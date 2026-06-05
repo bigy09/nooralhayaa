@@ -53,6 +53,11 @@ app.use(
     origin(origin, callback) {
       if (!origin) return callback(null, true);
       if (corsWhitelist.includes(origin)) return callback(null, true);
+      try {
+        const hostname = new URL(origin).hostname;
+        if (hostname.endsWith('.netlify.app')) return callback(null, true);
+      } catch (_error) {
+      }
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,

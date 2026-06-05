@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
     try {
       payload = await response.json()
     } catch (_error) {
-      payload = null
+      payload = { error: `HTTP ${response.status} ${response.statusText}`.trim() }
     }
 
     return { response, payload }
