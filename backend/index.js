@@ -36,7 +36,7 @@ const DEFAULT_ADMIN_EMAIL = 'mariieassata26@gmail.com';
 const DEFAULT_ADMIN_PASSWORD = '26022005';
 const serverDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(serverDirectory, '..');
-const clientDistPath = path.join(projectRoot, 'client', 'dist');
+const frontendDistPath = path.join(projectRoot, 'frontend', 'dist');
 
 if (!JWT_SECRET) {
   console.error('❌ Missing JWT_SECRET in environment variables');
@@ -1073,10 +1073,10 @@ app.get('/api/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => 
 });
 
 if (isProduction) {
-  app.use(express.static(clientDistPath));
+  app.use(express.static(frontendDistPath));
 
   app.get(/^\/(?!api\/).*/, (_req, res) => {
-    res.sendFile(path.join(clientDistPath, 'index.html'));
+    res.sendFile(path.join(frontendDistPath, 'index.html'));
   });
 }
 

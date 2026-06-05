@@ -92,7 +92,7 @@ This will populate all 12 products, 3 categories, and 3 banners.
 - Send payment notifications to admin WhatsApp
 
 ### Minimal Integration Now
-Update [client/src/utils/payment.js](../client/src/utils/payment.js):
+Update [frontend/src/utils/payment.js](../frontend/src/utils/payment.js):
 
 ```javascript
 export function generateWaveLink(order) {
@@ -118,7 +118,7 @@ export function generateWhatsAppLink(order) {
 ### Deploy Full App on Railway (Single Service)
 
 This repository is now configured for Railway with `railway.toml`.
-In production, Express serves the built frontend (`client/dist`) directly.
+In production, Express serves the built frontend (`frontend/dist`) directly.
 
 1. Go to [Railway](https://railway.app/) and sign in with your account (`reallyviewbest@icloud.com`).
 2. Create a new project from GitHub repository `bigy09/nooralhayaa`.
@@ -145,7 +145,7 @@ Install dependency:
 npm install nodemailer
 ```
 
-Create [server/services/emailService.js](../server/services/emailService.js):
+Create [backend/services/emailService.js](../backend/services/emailService.js):
 
 ```javascript
 import nodemailer from 'nodemailer';
@@ -180,7 +180,7 @@ export async function sendOrderConfirmation(order) {
 }
 ```
 
-Update server/index.js POST /api/orders:
+Update backend/index.js POST /api/orders:
 ```javascript
 import { sendOrderConfirmation } from './services/emailService.js';
 

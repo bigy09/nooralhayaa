@@ -4,10 +4,10 @@ coverage/
 .env
 .env.*
 !.env.example
-client/node_modules/
-client/dist/
-server/node_modules/
-server/.env
+frontend/node_modules/
+frontend/dist/
+backend/node_modules/
+backend/.env
 
 #Ignore vscode AI rules
 .github\instructions\codacy.instructions.md

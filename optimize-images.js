@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import fs from 'fs';
 import path from 'path';
 
-const ASSETS_DIR = './client/src/assets';
+const ASSETS_DIR = './frontend/src/assets';
 const carouselImages = ['carousel 1.jpg', 'carousel 2.jpg', 'carousel 3.jpg', 'carousel 4.jpg'];
 
 (async () => {

@@ -4,8 +4,8 @@ Base full-stack en JavaScript avec React/Vite pour le frontend et Node/Express p
 
 ## Structure
 
-- `client` : interface React
-- `server` : API Express
+- `frontend` : interface React
+- `backend` : API Express
 
 ## Demarrage
 
@@ -13,8 +13,8 @@ Installer les dependances dans chaque dossier :
 
 ```bash
 npm install
-npm install --prefix client
-npm install --prefix server
+npm install --prefix frontend
+npm install --prefix backend
 ```
 
 Lancer le frontend et le backend ensemble :
