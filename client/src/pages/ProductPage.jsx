@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Check, Globe, Heart, Link2, MessageCircle, Minus, Plus, Send, Share2, ShoppingBag } from 'lucide-react'
@@ -35,6 +35,12 @@ export default function ProductPage() {
   const [shareCopied, setShareCopied] = useState('')
   const { toggle, isLiked } = useWishlist()
 
+  useEffect(() => {
+    if (!selectedSize && product?.sizes?.length) {
+      setSelectedSize(product.sizes[0])
+    }
+  }, [product, selectedSize])
+
   const visual = useMemo(() => getProductVisual(product), [product])
   const shareUrl = useMemo(() => {
     if (!product) return ''
@@ -47,17 +53,22 @@ export default function ProductPage() {
   }, [product, visual.image, shareUrl])
 
   function handleAdd() {
-    if (!product || !selectedSize) return
+    if (!product) return
+    const sizeToUse = selectedSize || product.sizes?.[0]
+    if (!sizeToUse) return
     for (let index = 0; index < quantity; index += 1) {
-      add({ ...product, selectedSize, swatchIndex: selectedSwatch })
+      add({ ...product, selectedSize: sizeToUse, swatchIndex: selectedSwatch })
     }
     setAdded(true)
     window.setTimeout(() => setAdded(false), 1600)
   }
 
   function handleBuyNow() {
+    const sizeToUse = selectedSize || product?.sizes?.[0]
+    if (!sizeToUse) return
+    if (!selectedSize) setSelectedSize(sizeToUse)
     handleAdd()
-    if (selectedSize) navigate('/checkout')
+    navigate('/checkout')
   }
 
   async function handleNativeShare() {
@@ -244,7 +255,7 @@ export default function ProductPage() {
             Commander et payer
           </button>
 
-          {!selectedSize && <p className="mt-3 text-xs text-[#C4542D]">Choisis d'abord une taille pour commander.</p>}
+          {!product.sizes?.length && <p className="mt-3 text-xs text-[#C4542D]">Aucune taille disponible pour cet article.</p>}
 
           <div className="mt-8 border-t border-[#efe1d6] pt-6">
             {panels.map((panel) => {
