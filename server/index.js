@@ -6,6 +6,8 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import mongoose from 'mongoose';
 import { z } from 'zod';
 import { verifyToken, requireAdmin, requireUser } from './middleware/auth.js';
@@ -32,6 +34,9 @@ const ADMIN_REFRESH_COOKIE = 'admin_refresh_token';
 const isProduction = process.env.NODE_ENV === 'production';
 const DEFAULT_ADMIN_EMAIL = 'mariieassata26@gmail.com';
 const DEFAULT_ADMIN_PASSWORD = '26022005';
+const serverDirectory = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(serverDirectory, '..');
+const clientDistPath = path.join(projectRoot, 'client', 'dist');
 
 if (!JWT_SECRET) {
   console.error('❌ Missing JWT_SECRET in environment variables');
@@ -55,7 +60,7 @@ app.use(
       if (corsWhitelist.includes(origin)) return callback(null, true);
       try {
         const hostname = new URL(origin).hostname;
-        if (hostname.endsWith('.netlify.app')) return callback(null, true);
+        if (hostname.endsWith('.railway.app')) return callback(null, true);
       } catch (_error) {
       }
       return callback(new Error('Not allowed by CORS'));
@@ -1066,6 +1071,14 @@ app.get('/api/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => 
     return res.status(500).json({ error: error.message });
   }
 });
+
+if (isProduction) {
+  app.use(express.static(clientDistPath));
+
+  app.get(/^\/(?!api\/).*/, (_req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
 
 app.listen(port, () => {
   console.log(`🚀 Server listening on http://localhost:${port}`);

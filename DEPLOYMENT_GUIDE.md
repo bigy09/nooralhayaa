@@ -113,47 +113,26 @@ export function generateWhatsAppLink(order) {
 
 ---
 
-## 🚀 Step 3: Deployment
+## 🚀 Step 3: Deployment (Railway)
 
-### Option A: Render.com (Recommended - Free Tier)
+### Deploy Full App on Railway (Single Service)
 
-#### Deploy Backend
-1. Go to [Render.com](https://render.com)
-2. Sign up with GitHub
-3. **New Web Service** → Connect your repo
-4. **Configure**:
-   - Name: `noor-al-hayaa-api`
-   - Environment: Node
-   - Build: `npm install`
-   - Start: `npm start`
-   - Instance: Free (0.5 CPU, 512MB RAM)
-5. **Environment Variables**: Add all from `.env`
-6. Deploy → Get URL (e.g., `https://noor-al-hayaa-api.onrender.com`)
+This repository is now configured for Railway with `railway.toml`.
+In production, Express serves the built frontend (`client/dist`) directly.
 
-#### Deploy Frontend
-1. **New Static Site** → Connect your repo
-2. **Configure**:
-   - Name: `noor-al-hayaa`
-   - Build command: `npm run build --prefix client`
-   - Publish directory: `client/dist`
-3. **Environment**:
-   ```env
-   VITE_API_URL=https://noor-al-hayaa-api.onrender.com
-   ```
-4. Deploy → Get URL (e.g., `https://noor-al-hayaa.onrender.com`)
-
-#### Update Frontend `.env.production`
-```env
-VITE_API_URL=https://noor-al-hayaa-api.onrender.com
-VITE_MERCHANT_PHONE=2250702396063
-```
-
----
-
-### Option B: Vercel + Render (Alternative)
-
-**Frontend** → Vercel (faster, free, unlimited)
-**Backend** → Render (simpler Express setup)
+1. Go to [Railway](https://railway.app/) and sign in with your account (`reallyviewbest@icloud.com`).
+2. Create a new project from GitHub repository `bigy09/nooralhayaa`.
+3. In Railway Variables, add all required env values from `.env.example`.
+4. Set:
+  ```env
+  NODE_ENV=production
+  CORS_ORIGINS=https://YOUR-APP.up.railway.app
+  VITE_API_BASE_URL=https://YOUR-APP.up.railway.app
+  ```
+5. Trigger deploy. Railway will run the build command in `railway.toml` and start the app.
+6. Verify:
+  - Health check: `https://YOUR-APP.up.railway.app/api/health`
+  - Frontend: `https://YOUR-APP.up.railway.app`
 
 ---
 

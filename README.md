@@ -27,3 +27,13 @@ npm run dev
 
 - `GET /api/health`
 - `GET /api/highlights`
+
+## Deploiement Railway
+
+Ce repo est configure pour Railway avec [railway.toml](railway.toml).
+
+1. Connecter le repo `bigy09/nooralhayaa` dans Railway.
+2. Creer un nouveau projet Railway depuis ce repo.
+3. Ajouter les variables serveur (`MONGODB_URI`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `CORS_ORIGINS`, etc.) depuis [.env.example](.env.example).
+4. Definir `VITE_API_BASE_URL` avec l'URL publique Railway de l'app.
+5. Lancer le deploy: le backend sert aussi le frontend build en production.
