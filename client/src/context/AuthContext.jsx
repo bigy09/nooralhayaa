@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { buildApiUrl } from '../utils/api'
 
 const AuthContext = createContext(null)
 
@@ -56,7 +57,7 @@ export function AuthProvider({ children }) {
 
     if (token) headers.Authorization = `Bearer ${token}`
 
-    const response = await fetch(url, { ...options, headers, credentials: 'include' })
+    const response = await fetch(buildApiUrl(url), { ...options, headers, credentials: 'include' })
     let payload = null
     try {
       payload = await response.json()

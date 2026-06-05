@@ -30,6 +30,8 @@ const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
 const USER_REFRESH_COOKIE = 'user_refresh_token';
 const ADMIN_REFRESH_COOKIE = 'admin_refresh_token';
 const isProduction = process.env.NODE_ENV === 'production';
+const DEFAULT_ADMIN_EMAIL = 'mariieassata26@gmail.com';
+const DEFAULT_ADMIN_PASSWORD = '26022005';
 
 if (!JWT_SECRET) {
   console.error('❌ Missing JWT_SECRET in environment variables');
@@ -293,8 +295,8 @@ function generateOrderNumber() {
 }
 
 async function ensureAdminUser() {
-  const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const adminPassword = process.env.ADMIN_PASSWORD || '';
+  const adminEmail = (process.env.ADMIN_EMAIL || DEFAULT_ADMIN_EMAIL).trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD || DEFAULT_ADMIN_PASSWORD;
   if (!adminEmail || !adminPassword) return;
 
   const existing = await User.findOne({ email: adminEmail });

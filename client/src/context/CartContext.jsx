@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
+import { buildApiUrl } from '../utils/api'
 
 const CartContext = createContext(null)
 
@@ -36,7 +37,7 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     let alive = true
-    fetch('/api/cart')
+    fetch(buildApiUrl('/api/cart'))
       .then((response) => response.json())
       .then((data) => {
         if (!alive || !Array.isArray(data.items)) return
@@ -54,7 +55,7 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     if (!hydrated.current) return
-    fetch('/api/cart', {
+    fetch(buildApiUrl('/api/cart'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: state.items }),

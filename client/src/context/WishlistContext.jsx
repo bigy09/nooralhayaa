@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
+import { buildApiUrl } from '../utils/api'
 
 const WishlistContext = createContext(null)
 
@@ -35,7 +36,7 @@ export function WishlistProvider({ children }) {
 
   useEffect(() => {
     let alive = true
-    fetch('/api/wishlist')
+    fetch(buildApiUrl('/api/wishlist'))
       .then((response) => response.json())
       .then((data) => {
         if (!alive || !Array.isArray(data.items)) return
@@ -52,7 +53,7 @@ export function WishlistProvider({ children }) {
 
   useEffect(() => {
     if (!hydrated.current) return
-    fetch('/api/wishlist', {
+    fetch(buildApiUrl('/api/wishlist'), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ items: state.items }),

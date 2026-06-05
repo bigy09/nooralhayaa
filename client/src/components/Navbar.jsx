@@ -65,7 +65,7 @@ export default function Navbar() {
 
   const isHome = location.pathname === '/'
   const transparentMode = isHome && !scrolled
-  const lightText = transparentMode ? 'text-white' : 'text-[#8C6239]'
+  const lightText = 'text-white'
   const surfaceTop = transparentMode
     ? 'bg-transparent border-transparent'
     : 'bg-[#8C6239] border-[#8C6239]'

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { LOCAL_PRODUCTS, LOCAL_CATEGORIES } from '../data/products'
+import { buildApiUrl } from '../utils/api'
 
 function normalizeProduct(product) {
   if (!product) return product
@@ -16,7 +17,7 @@ export function useProducts(params = {}) {
   useEffect(() => {
     setLoading(true)
     const qs = new URLSearchParams(params).toString()
-    fetch(`/api/products${qs ? '?' + qs : ''}`)
+    fetch(buildApiUrl(`/api/products${qs ? '?' + qs : ''}`))
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -53,7 +54,7 @@ export function useProduct(id) {
   useEffect(() => {
     if (!id) return
     setLoading(true)
-    fetch(`/api/products/${id}`)
+    fetch(buildApiUrl(`/api/products/${id}`))
       .then(r => r.json())
       .then(data => {
         if (data && data.name) {
@@ -76,7 +77,7 @@ export function useCategories() {
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    fetch('/api/categories')
+    fetch(buildApiUrl('/api/categories'))
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -95,7 +96,7 @@ export function useBanners() {
   const [banners, setBanners] = useState([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    fetch('/api/banners').then(r => r.json()).then(data => { setBanners(data); setLoading(false) }).catch(() => { setBanners([]); setLoading(false) })
+    fetch(buildApiUrl('/api/banners')).then(r => r.json()).then(data => { setBanners(data); setLoading(false) }).catch(() => { setBanners([]); setLoading(false) })
   }, [])
   return { banners, loading }
 }
