@@ -73,7 +73,6 @@ export default function HommePage() {
           <h1 className="mt-4 text-3xl md:text-5xl font-semibold text-[#8C6239] leading-tight">Collection Homme</h1>
           <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[#8C6239]/72 md:text-base">Une selection masculine sobre, elegante et actuelle, avec une experience claire et rassurante.</p>
           <div className="mt-6 inline-flex rounded-full border border-[#C5A059]/25 bg-[#fffdfa] p-1 text-sm">
-            <Link to="/femme" className="rounded-full px-4 py-2 font-semibold text-[#8C6239] hover:bg-[#F9EAE1]">Femme</Link>
             <Link to="/homme" className="rounded-full bg-[#8C6239] px-4 py-2 font-semibold text-white">Homme</Link>
             <Link to="/shop" className="rounded-full px-4 py-2 font-semibold text-[#8C6239] hover:bg-[#F9EAE1]">Tout</Link>
           </div>
