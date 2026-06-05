@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+client/node_modules/
+client/dist/
+server/node_modules/
+server/.env
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md

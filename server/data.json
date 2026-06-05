@@ -1,0 +1,102 @@
+{
+  "orders": [
+    {
+      "id": 1,
+      "items": [
+        {
+          "id": 2,
+          "name": "Kimono Safa",
+          "price": 22000,
+          "categorySlug": "kimonos",
+          "swatches": [
+            "#4a1a6e",
+            "#1a3d5c"
+          ],
+          "sizes": [
+            "S",
+            "M",
+            "L"
+          ],
+          "featured": true,
+          "rating": 4.9,
+          "reviews": 31,
+          "description": "Coupe longue avec broderies fines sur les manches, disponible en deux couleurs.",
+          "selectedSize": "S",
+          "key": "2-S",
+          "qty": 1
+        },
+        {
+          "id": 2,
+          "name": "Kimono Safa",
+          "price": 22000,
+          "categorySlug": "kimonos",
+          "swatches": [
+            "#4a1a6e",
+            "#1a3d5c"
+          ],
+          "sizes": [
+            "S",
+            "M",
+            "L"
+          ],
+          "featured": true,
+          "rating": 4.9,
+          "reviews": 31,
+          "description": "Coupe longue avec broderies fines sur les manches, disponible en deux couleurs.",
+          "selectedSize": "M",
+          "swatchIndex": 0,
+          "key": "2-M",
+          "qty": 1
+        }
+      ],
+      "customer": {
+        "name": "yao hadeyon",
+        "phone": "+2250171019916",
+        "address": "abidjan"
+      },
+      "paymentMethod": "wave",
+      "total": 44000,
+      "status": "En attente de paiement",
+      "createdAt": "2026-04-24T20:20:45.509Z"
+    },
+    {
+      "id": 2,
+      "items": [
+        {
+          "id": 1,
+          "name": "Kimono Nour",
+          "price": 18000,
+          "categorySlug": "kimonos",
+          "swatches": [
+            "#2a2a2a",
+            "#7a1a2e"
+          ],
+          "sizes": [
+            "S",
+            "M",
+            "L",
+            "XL"
+          ],
+          "featured": true,
+          "rating": 4.8,
+          "reviews": 24,
+          "description": "Kimono elegant en tissu fluide, parfait pour une tenue modeste et raffinee.",
+          "selectedSize": "S",
+          "key": "1-S",
+          "qty": 1
+        }
+      ],
+      "customer": {
+        "name": "yao hadeyon",
+        "phone": "+2250171019916",
+        "address": "abidjan"
+      },
+      "paymentMethod": "wave",
+      "total": 18000,
+      "status": "En attente de paiement",
+      "createdAt": "2026-05-11T09:03:06.980Z"
+    }
+  ],
+  "cartItems": [],
+  "wishlistItems": []
+}
