@@ -18,13 +18,66 @@ function statusStyle(status) {
 
 function statusLabel(status) {
   const map = {
-    pending: 'En attente',
-    confirmed: 'Confirmee',
+    pending: 'En attente de paiement',
+    confirmed: 'En cours',
     shipped: 'Expediee',
     delivered: 'Livree',
     cancelled: 'Annulee',
   }
   return map[status] || status
+}
+
+const CANCELLATION_WINDOW_MS = 10 * 60 * 1000
+// Rafraîchit "mes commandes" périodiquement pour refléter les changements de
+// statut faits côté admin sans que le client ait à recharger la page.
+const POLL_INTERVAL_MS = 20 * 1000
+
+function useCountdown(target) {
+  const [remaining, setRemaining] = useState(() => target - Date.now())
+  useEffect(() => {
+    const interval = setInterval(() => setRemaining(target - Date.now()), 1000)
+    return () => clearInterval(interval)
+  }, [target])
+  return remaining
+}
+
+function CancelOrderButton({ order, onCancelled }) {
+  const { authFetch } = useAuth()
+  const [cancelling, setCancelling] = useState(false)
+  const [error, setError] = useState('')
+  const deadline = new Date(order.createdAt).getTime() + CANCELLATION_WINDOW_MS
+  const remaining = useCountdown(deadline)
+
+  if (order.status !== 'pending' || remaining <= 0) return null
+
+  const minutes = Math.floor(remaining / 60000)
+  const seconds = Math.floor((remaining % 60000) / 1000)
+
+  async function handleCancel() {
+    setCancelling(true)
+    setError('')
+    try {
+      await authFetch(`/api/orders/${order._id || order.id}/cancel`, { method: 'POST' })
+      onCancelled(order._id || order.id)
+    } catch (err) {
+      setError(err.message || "Impossible d'annuler la commande.")
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  return (
+    <div className="mt-3 flex flex-col items-end gap-1">
+      <button
+        onClick={handleCancel}
+        disabled={cancelling}
+        className="rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 transition-colors hover:bg-red-100 disabled:opacity-60"
+      >
+        Annuler la commande ({minutes}:{String(seconds).padStart(2, '0')})
+      </button>
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  )
 }
 
 function paymentLabel(method) {
@@ -41,13 +94,31 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    authFetch('/api/orders/mine')
-      .then((data) => {
-        setOrders(Array.isArray(data) ? [...data].reverse() : [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    let cancelled = false
+
+    function load() {
+      authFetch('/api/orders/mine')
+        .then((data) => {
+          if (cancelled) return
+          setOrders(Array.isArray(data) ? [...data].reverse() : [])
+          setLoading(false)
+        })
+        .catch(() => {
+          if (!cancelled) setLoading(false)
+        })
+    }
+
+    load()
+    const interval = setInterval(load, POLL_INTERVAL_MS)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [authFetch])
+
+  function handleCancelled(orderId) {
+    setOrders((prev) => prev.map((order) => ((order._id || order.id) === orderId ? { ...order, status: 'cancelled' } : order)))
+  }
 
   const stats = useMemo(() => {
     const pending = orders.filter((order) => order.status === 'pending').length
@@ -128,9 +199,12 @@ export default function OrdersPage() {
                         })}
                       </p>
                     </div>
-                    <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusStyle(order.status)}`}>
-                      {statusLabel(order.status)}
-                    </span>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusStyle(order.status)}`}>
+                        {statusLabel(order.status)}
+                      </span>
+                      <CancelOrderButton order={order} onCancelled={handleCancelled} />
+                    </div>
                   </div>
 
                   <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_auto]">

@@ -10,6 +10,16 @@ const userSchema = new mongoose.Schema(
       trim: true,
       index: true,
     },
+    name: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    preferredLocation: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     passwordHash: {
       type: String,
       required: true,

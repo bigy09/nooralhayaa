@@ -1,26 +1,18 @@
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, Heart, Search, SlidersHorizontal, X } from 'lucide-react'
+import { ArrowRight, Heart, Search } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { useCategories } from '../hooks/useApi'
+import { useCategories, useProducts } from '../hooks/useApi'
 import { formatPrice } from '../utils/payment'
 import { getProductVisual } from '../utils/productVisuals'
-import { LOCAL_PRODUCTS } from '../data/products'
-
-function normalizeProduct(product) {
-  if (!product) return product
-  return {
-    ...product,
-    id: product.id || product._id,
-  }
-}
 
 function ShopCard({ product, index }) {
   const { add } = useCart()
   const { toggle, isLiked } = useWishlist()
   const visual = getProductVisual(product)
+  const visualStyle = { background: visual.background }
 
   return (
     <motion.article
@@ -40,6 +32,7 @@ function ShopCard({ product, index }) {
         <img
           src={visual.image}
           alt={product.name}
+          loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/20 to-transparent" />
@@ -85,47 +78,50 @@ function ShopCard({ product, index }) {
 
 export default function ShopPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { categories } = useCategories()
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [searchValue, setSearchValue] = useState(searchParams.get('search') || '')
-
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '')
   const activeCategory = searchParams.get('category') || ''
   const searchQuery = searchParams.get('search') || ''
   const sortBy = searchParams.get('sort') || 'featured'
+  const { categories } = useCategories()
+
+  const categorize = (category) => {
+    if (!category) return 'all'
+    if (category.group) return category.group
+    if (['kimonos', 'ensembles-pantalon', 'jupes', 'voiles', 'jilbebs-khimars'].includes(category.slug)) return 'femme'
+    if (['tuniques'].includes(category.slug)) return 'homme'
+    // treat boubou as homme so it is hidden from public listing
+    if (['accessoires'].includes(category.slug)) return 'both'
+    return 'all'
+  }
+
+  const normalizedCategories = (categories || []).map((category) => ({
+    ...category,
+    group: categorize(category),
+  }))
+  const filteredCategories = normalizedCategories
+  const femaleCategories = filteredCategories.filter((category) => category.group === 'femme')
+  const maleCategories = filteredCategories.filter((category) => category.group === 'homme')
+  const selectedCategory = filteredCategories.find((category) => category.slug === activeCategory)
+  const isMaleCategory = selectedCategory?.group === 'homme'
+  const requestCategory = isMaleCategory ? '' : activeCategory
+
+  const { products, loading } = useProducts({
+    ...(requestCategory ? { category: requestCategory } : {}),
+    ...(searchQuery ? { search: searchQuery } : {}),
+  })
 
   useEffect(() => {
-    setLoading(true)
-    const qs = new URLSearchParams()
-    if (activeCategory) qs.set('category', activeCategory)
-    if (searchQuery) qs.set('search', searchQuery)
-    fetch(`/api/products${qs.toString() ? `?${qs.toString()}` : ''}`)
-      .then((response) => response.json())
-      .then((data) => {
-        let result = Array.isArray(data) && data.length > 0 ? data.map(normalizeProduct) : [...LOCAL_PRODUCTS]
-        if (activeCategory) result = result.filter(p => p.categorySlug === activeCategory)
-        if (searchQuery) {
-          const s = searchQuery.toLowerCase()
-          result = result.filter(p => p.name.toLowerCase().includes(s) || p.description?.toLowerCase().includes(s))
-        }
-        if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price)
-        if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
-        if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating)
-        if (sortBy === 'featured') result.sort((a, b) => Number(b.featured) - Number(a.featured))
-        setProducts(result)
-        setLoading(false)
-      })
-      .catch(() => {
-        let result = [...LOCAL_PRODUCTS].map(normalizeProduct)
-        if (activeCategory) result = result.filter(p => p.categorySlug === activeCategory)
-        if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price)
-        if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price)
-        if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating)
-        if (sortBy === 'featured') result.sort((a, b) => Number(b.featured) - Number(a.featured))
-        setProducts(result)
-        setLoading(false)
-      })
-  }, [activeCategory, searchQuery, sortBy])
+    setSearchInput(searchQuery)
+  }, [searchQuery])
+
+  const sortedProducts = useMemo(() => {
+    const result = [...products]
+    if (sortBy === 'price-asc') return result.sort((a, b) => a.price - b.price)
+    if (sortBy === 'price-desc') return result.sort((a, b) => b.price - a.price)
+    if (sortBy === 'rating') return result.sort((a, b) => b.rating - a.rating)
+    if (sortBy === 'featured') return result.sort((a, b) => Number(b.featured) - Number(a.featured))
+    return result
+  }, [products, sortBy])
 
   function setParam(key, value) {
     const next = new URLSearchParams(searchParams)
@@ -134,16 +130,11 @@ export default function ShopPage() {
     setSearchParams(next)
   }
 
-  function handleSearchSubmit(event) {
+  function handleSearch(event) {
     event.preventDefault()
-    setParam('search', searchValue.trim())
+    const trimmed = searchInput.trim()
+    setParam('search', trimmed || '')
   }
-
-  const activeLabel = useMemo(() => {
-    if (searchQuery) return `Recherche : ${searchQuery}`
-    if (activeCategory) return categories.find((category) => category.slug === activeCategory)?.name || 'Boutique'
-    return 'Toute la boutique'
-  }, [searchQuery, activeCategory, categories])
 
   return (
     <div className="min-h-screen bg-[#F9EAE1] pt-32 pb-16">
@@ -153,94 +144,95 @@ export default function ShopPage() {
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-[#C5A059] font-semibold">Boutique</p>
               <h1 className="mt-4 text-3xl md:text-5xl font-semibold text-[#8C6239] leading-tight">Selection de la boutique</h1>
-              <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#8C6239]/72 md:text-base">Filtre rapidement et ajoute au panier.</p>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#8C6239]/72 md:text-base">Filtre rapidement, recherche et explore les articles visibles.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8C6239]/45" />
-                <input
-                  type="search"
-                  value={searchValue}
-                  onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="Rechercher une piece..."
-                  className="w-full rounded-full border border-[#C5A059]/25 bg-[#fffdfa] py-3.5 pl-11 pr-4 text-sm text-[#8C6239] outline-none focus:border-[#C5A059]"
-                />
-              </form>
-              <div className="flex items-center gap-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#C5A059]/25 px-4 py-3 text-sm text-[#8C6239] bg-[#fffdfa]">
-                  <SlidersHorizontal size={15} />
-                  <select
-                    value={sortBy}
-                    onChange={(event) => setParam('sort', event.target.value)}
-                    className="bg-transparent outline-none"
-                  >
-                    <option value="featured">Selection maison</option>
-                    <option value="price-asc">Prix croissant</option>
-                    <option value="price-desc">Prix decroissant</option>
-                    <option value="rating">Mieux notes</option>
-                  </select>
-                </div>
+                <form onSubmit={handleSearch} className="relative w-full">
+              <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#8C6239]/50" />
+              <input
+                type="search"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Rechercher un article..."
+                className="w-full rounded-full border border-[#C5A059]/20 bg-white/90 py-3 pl-12 pr-4 text-sm text-[#8C6239] outline-none transition focus:border-[#8C6239]"
+              />
+            </form>
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#C5A059]/25 px-4 py-3 text-sm text-[#8C6239] bg-[#fffdfa]">
+                <select
+                  value={sortBy}
+                  onChange={(event) => setParam('sort', event.target.value)}
+                  className="bg-transparent outline-none"
+                >
+                  <option value="featured">Selection maison</option>
+                  <option value="price-asc">Prix croissant</option>
+                  <option value="price-desc">Prix decroissant</option>
+                  <option value="rating">Mieux notes</option>
+                </select>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 mt-8">
-        <div className="inline-flex rounded-full border border-[#C5A059]/25 bg-[#fffdfa] p-1 text-sm">
-          <Link to="/femme" className="rounded-full px-4 py-2 font-semibold text-[#8C6239] hover:bg-[#F9EAE1]">Femme</Link>
-          <Link to="/homme" className="rounded-full px-4 py-2 font-semibold text-[#8C6239] hover:bg-[#F9EAE1]">Homme</Link>
-          <Link to="/shop" className="rounded-full bg-[#8C6239] px-4 py-2 font-semibold text-white">Tout</Link>
-        </div>
-      </section>
-
       <section className="max-w-7xl mx-auto px-4 mt-6">
-        <div className="flex flex-wrap items-center gap-3">
+        {selectedCategory && (
+          <div className="mb-4 rounded-3xl border border-[#C5A059]/20 bg-white px-5 py-4 text-sm text-[#8C6239] shadow-[0_12px_30px_rgba(140,98,57,0.08)]">
+            Filtre active : <span className="font-semibold">{selectedCategory.name}</span>
+          </div>
+        )}
+        <div className="mb-5 flex flex-wrap items-center gap-3">
           <button
             onClick={() => setParam('category', '')}
             className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${!activeCategory ? 'bg-[#8C6239] text-white' : 'bg-white text-[#8C6239] border border-[#C5A059]/20'}`}
           >
             Tout
           </button>
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setParam('category', activeCategory === category.slug ? '' : category.slug)}
-              className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${activeCategory === category.slug ? 'bg-[#C5A059] text-white' : 'bg-white text-[#8C6239] border border-[#C5A059]/20 hover:border-[#C5A059]'}`}
-            >
-              {category.name}
-            </button>
-          ))}
-          {searchQuery && (
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#fffdfa] border border-[#C5A059]/20 px-4 py-2.5 text-sm text-[#8C6239]">
-              {activeLabel}
-              <button onClick={() => { setSearchValue(''); setParam('search', '') }} className="text-[#C5A059] hover:text-[#8C6239]">
-                <X size={14} />
-              </button>
-            </span>
-          )}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-[1.85rem] border border-[#C5A059]/15 bg-white p-5 shadow-[0_18px_40px_rgba(140,98,57,0.08)]">
+            <p className="mb-3 text-sm uppercase tracking-[0.3em] text-[#C5A059] font-semibold">Femmes</p>
+            <div className="flex flex-wrap gap-2">
+              {femaleCategories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setParam('category', activeCategory === category.slug ? '' : category.slug)}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${activeCategory === category.slug ? 'bg-[#8C6239] text-white' : 'bg-white text-[#8C6239] border border-[#C5A059]/20 hover:bg-[#F9EAE1]'}`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-[1.85rem] border border-[#C5A059]/15 bg-white p-5 shadow-[0_18px_40px_rgba(140,98,57,0.08)]">
+            <p className="mb-3 text-sm uppercase tracking-[0.3em] text-[#C5A059] font-semibold">Hommes</p>
+            <div className="flex flex-wrap gap-2">
+              {maleCategories.map((category) => (
+                <button
+                  key={category.id}
+                  disabled
+                  aria-disabled="true"
+                  className="rounded-full px-4 py-2 text-sm font-semibold text-[#8C6239]/50 bg-[#F9EAE1] border border-[#C5A059]/10 cursor-not-allowed opacity-70"
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-4 mt-8">
-        <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
-          <div>
-            <h2 className="text-2xl font-semibold text-[#8C6239]">{activeLabel}</h2>
-            {!loading && <p className="mt-1 text-sm text-[#8C6239]/60">{products.length} article{products.length > 1 ? 's' : ''}</p>}
-          </div>
-        </div>
-
         {loading ? (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
             {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="aspect-[4/5] rounded-[1.6rem] bg-white animate-pulse" />
+              <div key={index} className="aspect-[3/4] rounded-[1.6rem] bg-white animate-pulse" />
             ))}
           </div>
-        ) : products.length === 0 ? (
+        ) : sortedProducts.length === 0 ? (
           <div className="rounded-[2rem] bg-white px-6 py-20 text-center shadow-[0_18px_50px_rgba(140,98,57,0.08)]">
             <p className="text-lg font-medium text-[#8C6239]">Aucune piece trouvee</p>
             <button
-              onClick={() => { setSearchValue(''); setSearchParams({}) }}
+              onClick={() => setSearchParams({})}
               className="mt-4 inline-flex rounded-full bg-[#8C6239] px-5 py-3 text-sm font-semibold text-white"
             >
               Reinitialiser les filtres
@@ -248,7 +240,7 @@ export default function ShopPage() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-            {products.map((product, index) => (
+            {sortedProducts.map((product, index) => (
               <ShopCard key={product.id} product={product} index={index} />
             ))}
           </div>

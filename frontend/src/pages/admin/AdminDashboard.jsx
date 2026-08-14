@@ -8,21 +8,29 @@ import {
   Clock,
   LogOut,
   Package,
+  Plus,
   Search,
   Settings,
   TrendingUp,
   Users,
-  MessageCircle,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 const STATUS_CONFIG = {
   pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  confirmed: { label: 'Confirmee', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-  shipped: { label: 'Expediee', color: 'bg-purple-100 text-purple-800', icon: Package },
-  delivered: { label: 'Livree', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  cancelled: { label: 'Annulee', color: 'bg-red-100 text-red-800', icon: AlertCircle },
+  confirmed: { label: 'Confirmée', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
+  shipped: { label: 'Expédiée', color: 'bg-purple-100 text-purple-800', icon: Package },
+  delivered: { label: 'Livrée', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+  cancelled: { label: 'Annulée', color: 'bg-red-100 text-red-800', icon: AlertCircle },
 }
+
+const ORDER_FILTERS = [
+  { key: '', label: 'Tous' },
+  { key: 'pending', label: 'En attente' },
+  { key: 'inProgress', label: 'En cours' },
+  { key: 'delivered', label: 'Livrée' },
+  { key: 'cancelled', label: 'Annulée' },
+]
 
 const PAYMENT_LABELS = {
   wave: 'Wave',
@@ -36,7 +44,6 @@ const MENU = [
   { key: 'orders', label: 'Ordres', icon: Package },
   { key: 'products', label: 'Produits', icon: BarChart3 },
   { key: 'clients', label: 'Clients', icon: Users },
-  { key: 'discussions', label: 'Discussions', icon: MessageCircle },
   { key: 'analytics', label: 'Analytique', icon: BarChart3 },
   { key: 'settings', label: 'Parametres', icon: Settings },
 ]
@@ -69,15 +76,28 @@ export default function AdminDashboard() {
   const [chartTab, setChartTab] = useState('sales')
   const [loading, setLoading] = useState(true)
 
-  const [stats, setStats] = useState({ todayOrders: 0, todaySales: 0, monthSales: 0, weekly: [], recentOrders: [] })
+  const [stats, setStats] = useState({ todayOrders: 0, todaySales: 0, monthSales: 0, pendingOrders: 0, inProgressOrders: 0, weekly: [], recentOrders: [] })
   const [orders, setOrders] = useState([])
   const [products, setProducts] = useState([])
   const [clients, setClients] = useState([])
-  const [discussions, setDiscussions] = useState([])
   const [analytics, setAnalytics] = useState({ paymentBreakdown: [], statusBreakdown: [], topProducts: [] })
   const [auditLogs, setAuditLogs] = useState([])
   const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '' })
   const [passwordFeedback, setPasswordFeedback] = useState({ type: '', message: '' })
+  const [newProductForm, setNewProductForm] = useState({
+    name: '',
+    description: '',
+    price: '0',
+    categorySlug: '',
+    inventory: '0',
+    isVisible: true,
+    isOutOfStock: false,
+    featured: false,
+    images: '',
+    sizes: '',
+    rating: '0',
+  })
+  const [productFeedback, setProductFeedback] = useState({ type: '', message: '' })
 
   const [expandedOrder, setExpandedOrder] = useState(null)
   const [orderFilter, setOrderFilter] = useState('')
@@ -102,6 +122,8 @@ export default function AdminDashboard() {
       todayOrders: data.todayOrders || 0,
       todaySales: data.todaySales || 0,
       monthSales: data.monthSales || 0,
+      pendingOrders: data.pendingOrders || 0,
+      inProgressOrders: data.inProgressOrders || 0,
       weekly: Array.isArray(data.weekly) ? data.weekly : [],
       recentOrders: Array.isArray(data.recentOrders) ? data.recentOrders : [],
     })
@@ -124,11 +146,6 @@ export default function AdminDashboard() {
     setClients(Array.isArray(data.clients) ? data.clients : [])
   }
 
-  async function loadDiscussions() {
-    const data = await authFetch('/api/admin/discussions')
-    setDiscussions(Array.isArray(data.discussions) ? data.discussions : [])
-  }
-
   async function loadAnalytics() {
     const data = await authFetch('/api/admin/analytics')
     setAnalytics({
@@ -146,7 +163,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (activeView === 'products') loadProducts()
     if (activeView === 'clients') loadClients()
-    if (activeView === 'discussions') loadDiscussions()
     if (activeView === 'analytics') loadAnalytics()
     if (activeView === 'settings') loadAuditLogs()
   }, [activeView, productSearch])
@@ -167,7 +183,7 @@ export default function AdminDashboard() {
 
       setTimeout(async () => {
         await logoutAdmin()
-        navigate('/admin/login')
+        navigate('/login')
       }, 1000)
     } catch (error) {
       setPasswordFeedback({ type: 'error', message: error.message || 'Erreur lors du changement de mot de passe' })
@@ -192,6 +208,52 @@ export default function AdminDashboard() {
     await loadProducts()
   }
 
+  async function createProduct(event) {
+    event.preventDefault()
+    setProductFeedback({ type: '', message: '' })
+
+    try {
+      const payload = {
+        name: newProductForm.name.trim(),
+        description: newProductForm.description.trim(),
+        price: Number(newProductForm.price),
+        categorySlug: newProductForm.categorySlug.trim(),
+        inventory: Number(newProductForm.inventory),
+        isVisible: newProductForm.isVisible,
+        isOutOfStock: newProductForm.isOutOfStock,
+        featured: newProductForm.featured,
+        rating: Number(newProductForm.rating),
+        images: newProductForm.images.split(',').map((item) => item.trim()).filter(Boolean),
+        sizes: newProductForm.sizes.split(',').map((item) => item.trim()).filter(Boolean),
+      }
+
+      await authFetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      setNewProductForm({
+        name: '',
+        description: '',
+        price: '0',
+        categorySlug: '',
+        inventory: '0',
+        isVisible: true,
+        isOutOfStock: false,
+        featured: false,
+        images: '',
+        sizes: '',
+        rating: '0',
+      })
+      setProductSearch('')
+      await loadProducts()
+      setProductFeedback({ type: 'success', message: 'Produit créé avec succès.' })
+    } catch (error) {
+      setProductFeedback({ type: 'error', message: error.message || 'Erreur lors de la création du produit' })
+    }
+  }
+
   function exportProducts() {
     const rows = [
       ['Nom', 'Categorie', 'Prix', 'Inventaire', 'Visible', 'Epuisé'],
@@ -207,7 +269,11 @@ export default function AdminDashboard() {
     document.body.removeChild(link)
   }
 
-  const filteredOrders = useMemo(() => (orderFilter ? orders.filter((o) => o.status === orderFilter) : orders), [orders, orderFilter])
+  const filteredOrders = useMemo(() => {
+    if (!orderFilter) return orders
+    if (orderFilter === 'inProgress') return orders.filter((o) => ['confirmed', 'shipped'].includes(o.status))
+    return orders.filter((o) => o.status === orderFilter)
+  }, [orders, orderFilter])
 
   if (loading) {
     return <div className="min-h-screen bg-[#F9EAE1] pt-32 px-6 text-[#8C6239]/70">Chargement dashboard admin...</div>
@@ -250,10 +316,11 @@ export default function AdminDashboard() {
 
         <section>
           {(activeView === 'dashboard' || activeView === 'orders') && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {[
                 { label: 'Commandes du jour', value: stats.todayOrders, icon: Package, color: 'text-[#C5A059]' },
-                { label: 'Ventes du jour', value: `${stats.todaySales.toLocaleString('fr-FR')} F CFA`, icon: Clock, color: 'text-yellow-600' },
+                { label: 'En attente', value: stats.pendingOrders, icon: Clock, color: 'text-yellow-600' },
+                { label: 'En cours', value: stats.inProgressOrders, icon: TrendingUp, color: 'text-purple-600' },
                 { label: 'Ventes mensuelles', value: `${stats.monthSales.toLocaleString('fr-FR')} F CFA`, icon: TrendingUp, color: 'text-green-600' },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-xl border border-[#C5A059]/15 bg-white p-6 shadow-sm">
@@ -312,14 +379,14 @@ export default function AdminDashboard() {
 
           {activeView === 'orders' && (
             <>
-              <div className="mb-4 flex items-center gap-2">
-                {['', 'pending', 'confirmed', 'shipped', 'cancelled'].map((status) => (
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                {ORDER_FILTERS.map((filter) => (
                   <button
-                    key={status || 'all'}
-                    onClick={() => setOrderFilter(status)}
-                    className={`px-3 py-1.5 rounded-full text-xs ${orderFilter === status ? 'bg-[#8C6239] text-white' : 'bg-white border border-[#C5A059]/25 text-[#8C6239]'}`}
+                    key={filter.key || 'all'}
+                    onClick={() => setOrderFilter(filter.key)}
+                    className={`px-3 py-1.5 rounded-full text-xs ${orderFilter === filter.key ? 'bg-[#8C6239] text-white' : 'bg-white border border-[#C5A059]/25 text-[#8C6239]'}`}
                   >
-                    {status === '' ? 'Tous' : status}
+                    {filter.label}
                   </button>
                 ))}
               </div>
@@ -372,6 +439,34 @@ export default function AdminDashboard() {
                         <option value="delivered">Livree</option>
                         <option value="cancelled">Annulee</option>
                       </select>
+                          <div className="mt-4 flex gap-3">
+                            {order.customer?.phone ? (
+                              <a
+                                href={`https://wa.me/${(order.customer.phone || '').replace(/[^0-9+]/g, '')}?text=${encodeURIComponent(`Bonjour ${order.customer?.name || ''}, votre commande ${order.orderNumber} est en cours de traitement.`)}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="px-3 py-2 rounded-lg bg-[#25D366] text-white text-sm font-semibold"
+                              >
+                                Contacter (WhatsApp)
+                              </a>
+                            ) : (
+                              <button disabled className="px-3 py-2 rounded-lg bg-gray-200 text-gray-600 text-sm">Sans numero</button>
+                            )}
+
+                            <button
+                              onClick={async () => {
+                                // mark products in this order as out of stock
+                                for (const item of order.items || []) {
+                                  if (!item.productId) continue
+                                  await updateProduct(item.productId, { isOutOfStock: true })
+                                }
+                                await loadProducts()
+                              }}
+                              className="px-3 py-2 rounded-lg bg-orange-100 text-[#8C6239] text-sm font-semibold"
+                            >
+                              Marquer indisponible
+                            </button>
+                          </div>
                     </div>
                   ))}
                 </div>
@@ -380,42 +475,152 @@ export default function AdminDashboard() {
           )}
 
           {activeView === 'products' && (
-            <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#F9EAE1] flex flex-wrap gap-3 items-center justify-between">
-                <h2 className="text-lg font-semibold text-[#8C6239]">Produits</h2>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C6239]/55" />
-                    <input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Recherche nom/categorie" className="rounded-lg border border-[#C5A059]/25 py-2 pl-8 pr-3 text-sm" />
+            <div className="space-y-6">
+              <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-[#F9EAE1] flex flex-wrap gap-3 items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-[#8C6239]">Produits</h2>
+                    <p className="text-sm text-[#8C6239]/60">Voir tous les produits et créer de nouveaux articles visibles en boutique.</p>
                   </div>
-                  <button onClick={exportProducts} className="px-3 py-2 rounded-lg bg-[#8C6239] text-white text-xs font-semibold">Exporter</button>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C6239]/55" />
+                      <input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Recherche nom/categorie" className="rounded-lg border border-[#C5A059]/25 py-2 pl-8 pr-3 text-sm" />
+                    </div>
+                    <button onClick={exportProducts} className="px-3 py-2 rounded-lg bg-[#8C6239] text-white text-xs font-semibold">Exporter</button>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-[#F9EAE1]/30">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Produit</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Categorie</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Prix</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Inventaire</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Visible</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Epuisé</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F9EAE1]">
+                      {products.map((product) => (
+                        <tr key={product._id}>
+                          <td className="px-6 py-4 text-sm text-[#8C6239] font-medium">{product.name}</td>
+                          <td className="px-6 py-4 text-sm text-[#8C6239]/75">{product.categorySlug}</td>
+                          <td className="px-6 py-4 text-sm text-[#C5A059] font-semibold">{Number(product.price || 0).toLocaleString('fr-FR')} F CFA</td>
+                          <td className="px-6 py-4 text-sm text-[#8C6239]/75">{product.inventory ?? 0}</td>
+                          <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isVisible: !product.isVisible })} className={`px-2.5 py-1 rounded-full text-xs ${product.isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{product.isVisible ? 'Visible' : 'Masque'}</button></td>
+                          <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isOutOfStock: !product.isOutOfStock })} className={`px-2.5 py-1 rounded-full text-xs ${product.isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{product.isOutOfStock ? 'Oui' : 'Non'}</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-[#F9EAE1]/30">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Produit</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Categorie</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Prix</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Inventaire</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Visible</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Epuisé</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#F9EAE1]">
-                    {products.map((product) => (
-                      <tr key={product._id}>
-                        <td className="px-6 py-4 text-sm text-[#8C6239] font-medium">{product.name}</td>
-                        <td className="px-6 py-4 text-sm text-[#8C6239]/75">{product.categorySlug}</td>
-                        <td className="px-6 py-4 text-sm text-[#C5A059] font-semibold">{Number(product.price || 0).toLocaleString('fr-FR')} F CFA</td>
-                        <td className="px-6 py-4 text-sm text-[#8C6239]/75">{product.inventory ?? 0}</td>
-                        <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isVisible: !product.isVisible })} className={`px-2.5 py-1 rounded-full text-xs ${product.isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{product.isVisible ? 'Visible' : 'Masque'}</button></td>
-                        <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isOutOfStock: !product.isOutOfStock })} className={`px-2.5 py-1 rounded-full text-xs ${product.isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{product.isOutOfStock ? 'Oui' : 'Non'}</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Plus size={18} className="text-[#8C6239]" />
+                  <h3 className="text-lg font-semibold text-[#8C6239]">Créer un nouveau produit</h3>
+                </div>
+                <form onSubmit={createProduct} className="grid gap-4 md:grid-cols-2">
+                  <input
+                    value={newProductForm.name}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="Nom du produit"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                    required
+                  />
+                  <input
+                    value={newProductForm.categorySlug}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, categorySlug: e.target.value }))}
+                    placeholder="Catégorie (ex: robes, kimonos, accessoires)"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                    required
+                  />
+                  <textarea
+                    value={newProductForm.description}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, description: e.target.value }))}
+                    placeholder="Description"
+                    className="col-span-2 w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm min-h-[120px]"
+                  />
+                  <input
+                    value={newProductForm.price}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, price: e.target.value }))}
+                    type="number"
+                    min="0"
+                    placeholder="Prix en F CFA"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                    required
+                  />
+                  <input
+                    value={newProductForm.inventory}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, inventory: e.target.value }))}
+                    type="number"
+                    min="0"
+                    placeholder="Stock disponible"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                  />
+                  <input
+                    value={newProductForm.rating}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, rating: e.target.value }))}
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                    placeholder="Note (0-5)"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                  />
+                  <input
+                    value={newProductForm.sizes}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, sizes: e.target.value }))}
+                    placeholder="Taille(s) séparées par des virgules"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                  />
+                  <input
+                    value={newProductForm.images}
+                    onChange={(e) => setNewProductForm((prev) => ({ ...prev, images: e.target.value }))}
+                    placeholder="URLs d'images séparées par des virgules"
+                    className="w-full rounded-lg border border-[#C5A059]/25 px-4 py-3 text-sm"
+                  />
+                  <label className="flex items-center gap-3 text-sm text-[#8C6239]">
+                    <input
+                      type="checkbox"
+                      checked={newProductForm.isVisible}
+                      onChange={(e) => setNewProductForm((prev) => ({ ...prev, isVisible: e.target.checked }))}
+                      className="h-4 w-4 rounded border-[#C5A059]/25 text-[#8C6239]"
+                    />
+                    Produit visible
+                  </label>
+                  <label className="flex items-center gap-3 text-sm text-[#8C6239]">
+                    <input
+                      type="checkbox"
+                      checked={newProductForm.isOutOfStock}
+                      onChange={(e) => setNewProductForm((prev) => ({ ...prev, isOutOfStock: e.target.checked }))}
+                      className="h-4 w-4 rounded border-[#C5A059]/25 text-[#8C6239]"
+                    />
+                    Épuisé
+                  </label>
+                  <label className="flex items-center gap-3 text-sm text-[#8C6239]">
+                    <input
+                      type="checkbox"
+                      checked={newProductForm.featured}
+                      onChange={(e) => setNewProductForm((prev) => ({ ...prev, featured: e.target.checked }))}
+                      className="h-4 w-4 rounded border-[#C5A059]/25 text-[#8C6239]"
+                    />
+                    Produit mis en avant
+                  </label>
+                  <div className="col-span-2 flex flex-wrap items-center gap-3">
+                    <button type="submit" className="rounded-full bg-[#8C6239] px-5 py-3 text-sm font-semibold text-white hover:bg-[#7b502f] transition-colors">
+                      Créer le produit
+                    </button>
+                    {productFeedback.message && (
+                      <p className={`text-sm ${productFeedback.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                        {productFeedback.message}
+                      </p>
+                    )}
+                  </div>
+                </form>
               </div>
             </div>
           )}
@@ -448,24 +653,6 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeView === 'discussions' && (
-            <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-[#F9EAE1]"><h2 className="text-lg font-semibold text-[#8C6239]">Discussions clients</h2></div>
-              <ul className="divide-y divide-[#F9EAE1]">
-                {discussions.map((d) => (
-                  <li key={d.id} className="px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#8C6239]">{d.customerName} · {d.orderNumber}</p>
-                      <p className="text-xs text-[#8C6239]/60">{d.customerPhone} · {Number(d.total || 0).toLocaleString('fr-FR')} F CFA</p>
-                    </div>
-                    {d.whatsappLink ? (
-                      <a href={d.whatsappLink} target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs bg-[#25D366] text-white">Contacter</a>
-                    ) : <span className="text-xs text-[#8C6239]/40">Sans numero</span>}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
 
           {activeView === 'analytics' && (
             <div className="grid gap-6 md:grid-cols-2">

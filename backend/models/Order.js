@@ -39,6 +39,11 @@ const orderSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+      email: {
+        type: String,
+        required: false,
+        index: true,
+      },
       address: {
         type: String,
         required: true,
@@ -54,10 +59,35 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    paymentAmount: {
+      type: Number,
+      default: 0,
+    },
+    // Choix binaire du client : payer la totalité, ou l'acompte fixe (PAYMENT_MINIMUM).
+    paymentChoice: {
+      type: String,
+      enum: ['full', 'deposit'],
+      default: 'full',
+    },
     paymentMethod: {
       type: String,
       enum: ['wave', 'moov', 'mtn', 'orange'],
       required: true,
+    },
+    // Reliquat encore dû (acompte uniquement) — suivi côté back office.
+    remainingAtDelivery: {
+      type: Number,
+      default: 0,
+    },
+    paidAmount: {
+      type: Number,
+      default: 0,
+    },
+    transactionReference: String,
+    inventoryReserved: {
+      type: Boolean,
+      default: false,
+      index: true,
     },
     status: {
       type: String,

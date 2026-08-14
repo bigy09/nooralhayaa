@@ -1,16 +1,20 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Lock, Mail, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { register } = useAuth()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
+  const [preferredLocation, setPreferredLocation] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const nextPath = location.state?.from || '/orders'
 
   async function onSubmit(event) {
     event.preventDefault()
@@ -22,8 +26,8 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      await register({ email, password })
-      navigate('/checkout', { replace: true })
+      await register({ name, email, password, preferredLocation })
+      navigate(nextPath, { replace: true })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -46,6 +50,28 @@ export default function RegisterPage() {
         <p className="mt-2 text-sm text-[#8C6239]/65">Cree ton compte pour commander et suivre ton historique.</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold text-[#8C6239]">Nom complet</span>
+            <input
+              type="text"
+              required
+              minLength={2}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-xl border border-[#C5A059]/28 bg-[#fffdfa] py-3 px-3 text-sm text-[#8C6239] outline-none focus:border-[#C5A059]"
+              placeholder="Ton nom complet"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-xs font-semibold text-[#8C6239]">Localisation préférée</span>
+            <input
+              type="text"
+              value={preferredLocation}
+              onChange={(e) => setPreferredLocation(e.target.value)}
+              className="w-full rounded-xl border border-[#C5A059]/28 bg-[#fffdfa] py-3 px-3 text-sm text-[#8C6239] outline-none focus:border-[#C5A059]"
+              placeholder="Ex : Abidjan, Yopougon"
+            />
+          </label>
           <label className="block">
             <span className="mb-1.5 block text-xs font-semibold text-[#8C6239]">Email</span>
             <div className="relative">
@@ -106,7 +132,7 @@ export default function RegisterPage() {
 
         <p className="mt-5 text-sm text-[#8C6239]/65">
           Deja un compte ?{' '}
-          <Link to="/login" className="font-semibold text-[#C5A059] hover:text-[#8C6239]">
+          <Link to="/login" state={{ from: nextPath }} className="font-semibold text-[#C5A059] hover:text-[#8C6239]">
             Se connecter
           </Link>
         </p>

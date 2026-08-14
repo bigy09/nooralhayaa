@@ -1,7 +1,11 @@
 ﻿import { Link } from 'react-router-dom'
 import { Globe, Camera, MessageCircle, Phone, Mail, MapPin } from 'lucide-react'
+import { useSiteConfig } from '../hooks/useSiteConfig'
 
 export default function Footer() {
+  const { config } = useSiteConfig()
+  const contactPhone = config.infoline || config.whatsapp || '+225 07 02 39 60 63'
+  const whatsappUrl = `https://wa.me/${(config.whatsapp || '2250702396063').replace(/\D/g, '')}`
   return (
     <footer className="bg-black text-white">
       <div className="max-w-5xl mx-auto px-4 pt-10 pb-6">
@@ -34,7 +38,7 @@ export default function Footer() {
             </a>
           </li>
           <li>
-            <a href="https://wa.me/2250702396063" rel="noreferrer" target="_blank" className="text-white/50 hover:text-[#C5A059] transition-colors">
+            <a href={whatsappUrl} rel="noreferrer" target="_blank" className="text-white/50 hover:text-[#C5A059] transition-colors">
               <span className="sr-only">WhatsApp</span>
               <MessageCircle size={22} />
             </a>
@@ -42,7 +46,7 @@ export default function Footer() {
         </ul>
 
         <div className="flex flex-wrap justify-center gap-6 text-xs text-white/40">
-          <span className="flex items-center gap-1.5"><Phone size={11} className="text-[#C5A059]" />+225 07 02 39 60 63</span>
+          <span className="flex items-center gap-1.5"><Phone size={11} className="text-[#C5A059]" />{contactPhone}</span>
           <span className="flex items-center gap-1.5"><Mail size={11} className="text-[#C5A059]" />contact@nooralhayaa.com</span>
           <span className="flex items-center gap-1.5"><MapPin size={11} className="text-[#C5A059]" />Dakar, Senegal</span>
         </div>

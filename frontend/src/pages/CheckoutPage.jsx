@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, Check, ChevronRight, Clock3, MessageCircle, Shield, Smartphone, Truck } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice, generateMobileMoneyLink, getPaymentMethodDetails } from '../utils/payment'
+import { getDeliveryPrice, getDeliveryZones } from '../utils/delivery'
+import { buildApiUrl } from '../utils/api'
 
 const PAYMENT_METHODS = [
   {
@@ -74,10 +76,61 @@ export default function CheckoutPage() {
 
   const [step, setStep] = useState(1)
   const [method, setMethod] = useState('orange')
+  const [paymentConfig, setPaymentConfig] = useState({ paymentNumbers: {}, minimumPayment: 0, whatsapp: '', infoline: '' })
+  const [paymentDetails, setPaymentDetails] = useState(null)
+  // Choix binaire obligatoire : 'full' (totalité) ou 'deposit' (acompte fixe).
+  // Reste à `null` jusqu'à sélection explicite pour pouvoir bloquer la validation.
+  const [paymentChoice, setPaymentChoice] = useState(null)
   const [loading, setLoading] = useState(false)
   const [order, setOrder] = useState(null)
-  const [form, setForm] = useState({ name: '', phone: '', address: '' })
+  const [form, setForm] = useState({ name: '', phone: '', address: '', email: '', deliveryZone: '' })
   const [errors, setErrors] = useState({})
+  const deliveryZones = getDeliveryZones()
+  const deliveryPrice = getDeliveryPrice(form.deliveryZone)
+  const orderTotalWithDelivery = total + deliveryPrice
+
+  useEffect(() => {
+    async function loadConfig() {
+      try {
+        const response = await globalThis.fetch(buildApiUrl('/api/config/contacts'))
+        const payload = await response.json()
+        if (response.ok) {
+          setPaymentConfig({
+            paymentNumbers: payload.paymentNumbers || {},
+            minimumPayment: payload.minimumPayment || 0,
+            whatsapp: payload.whatsapp || '',
+            infoline: payload.infoline || '',
+          })
+        }
+      } catch {
+        // Ignore configuration load failures temporarily
+      }
+    }
+
+    loadConfig()
+  }, [])
+
+  useEffect(() => {
+    async function loadPaymentDetails() {
+      if (!orderTotalWithDelivery) return
+      try {
+        const response = await authFetch('/api/orders/calculate-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ total: orderTotalWithDelivery, paymentChoice }),
+        })
+        if (response && typeof response.paymentAmount === 'number') {
+          setPaymentDetails(response)
+          // Si l'acompte n'est pas proposé (total <= seuil), le choix est forcé à "full".
+          if (!response.canOfferDeposit) setPaymentChoice('full')
+        }
+      } catch {
+        setPaymentDetails(null)
+      }
+    }
+
+    loadPaymentDetails()
+  }, [authFetch, orderTotalWithDelivery, paymentChoice])
 
   if (items.length === 0 && !order) {
     return (
@@ -101,6 +154,9 @@ export default function CheckoutPage() {
     if (!form.name.trim()) nextErrors.name = 'Nom requis'
     if (!form.phone.trim()) nextErrors.phone = 'Numero requis'
     else if (!/^\+?[0-9]{8,15}$/.test(form.phone.replace(/\s/g, ''))) nextErrors.phone = 'Numero invalide'
+    if (!form.address.trim()) nextErrors.address = 'Adresse requise'
+    if (!form.deliveryZone) nextErrors.deliveryZone = 'Sélectionne une zone de livraison'
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) nextErrors.email = 'Email invalide'
     return nextErrors
   }
 
@@ -108,6 +164,17 @@ export default function CheckoutPage() {
     const nextErrors = validate()
     if (Object.keys(nextErrors).length) {
       setErrors(nextErrors)
+      return
+    }
+
+    if (!paymentDetails) {
+      globalThis.alert('Impossible de calculer le montant de paiement. Veuillez réessayer.')
+      return
+    }
+
+    // Bloque la validation si aucun des deux choix (totalité / acompte) n'a été fait.
+    if (!paymentChoice) {
+      setErrors({ paymentChoice: 'Choisis un mode de paiement : totalité ou acompte.' })
       return
     }
 
@@ -128,17 +195,20 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           items: normalizedItems,
-          customer: form,
+          customer: {
+            ...form,
+            address: `${form.address} — ${form.deliveryZone}`,
+          },
           paymentMethod: method,
-          total,
-          subtotal: items.reduce((sum, item) => sum + (item.price * item.qty), 0),
-          shipping: 0,
+          paymentChoice,
+          deliveryZone: form.deliveryZone,
         }),
       })
       setOrder(data)
 
-      const paymentLink = generateMobileMoneyLink(method)
-      if (paymentLink) window.open(paymentLink, '_blank')
+      const methodNumber = (paymentConfig.paymentNumbers || {})[method] || getPaymentMethodDetails(method).number
+      const paymentLink = generateMobileMoneyLink(method, methodNumber)
+      if (paymentLink) globalThis.open(paymentLink, '_blank')
 
       clear()
       setStep(3)
@@ -192,25 +262,53 @@ export default function CheckoutPage() {
                 <h2 className="text-lg font-semibold text-[#8C6239] mb-5">Informations de livraison</h2>
                 <div className="space-y-4">
                   {[
-                    { key: 'name', label: 'Nom complet *', placeholder: 'Ton nom complet', type: 'text' },
-                    { key: 'phone', label: 'Numero de telephone *', placeholder: '+225 0X XX XX XX XX', type: 'tel' },
-                    { key: 'address', label: 'Adresse de livraison', placeholder: 'Rue, quartier, ville', type: 'text' },
+                      { key: 'name', label: 'Nom complet *', placeholder: 'Ton nom complet', type: 'text' },
+                      { key: 'phone', label: 'Numero de telephone *', placeholder: '+225 0X XX XX XX XX', type: 'tel' },
+                      { key: 'email', label: 'Adresse email', placeholder: 'prenom@exemple.com', type: 'email' },
+                      { key: 'address', label: 'Adresse de livraison', placeholder: 'Rue, quartier, ville', type: 'text' },
                   ].map((field) => (
                     <div key={field.key}>
                       <label className="mb-1.5 block text-xs font-semibold text-[#8C6239]">{field.label}</label>
                       <input
                         type={field.type}
-                        value={form[field.key]}
-                        onChange={(event) => {
-                          setForm((prev) => ({ ...prev, [field.key]: event.target.value }))
-                          setErrors((prev) => ({ ...prev, [field.key]: '' }))
-                        }}
+                          value={form[field.key]}
+                          onChange={(event) => {
+                            setForm((prev) => ({ ...prev, [field.key]: event.target.value }))
+                            setErrors((prev) => ({ ...prev, [field.key]: '' }))
+                          }}
                         placeholder={field.placeholder}
                         className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all ${errors[field.key] ? 'border-red-300 bg-red-50 focus:border-red-400' : 'border-[#C5A059]/25 bg-[#fffdfa] text-[#8C6239] focus:border-[#C5A059]'}`}
                       />
                       {errors[field.key] && <p className="mt-1 text-xs text-red-500">{errors[field.key]}</p>}
                     </div>
                   ))}
+                </div>
+
+                <div className="mt-4">
+                  <label className="mb-1.5 block text-xs font-semibold text-[#8C6239]">Zone de livraison *</label>
+                  <select
+                    value={form.deliveryZone}
+                    onChange={(event) => {
+                      setForm((prev) => ({ ...prev, deliveryZone: event.target.value }))
+                      setErrors((prev) => ({ ...prev, deliveryZone: '' }))
+                    }}
+                    className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition-all ${errors.deliveryZone ? 'border-red-300 bg-red-50 focus:border-red-400' : 'border-[#C5A059]/25 bg-[#fffdfa] text-[#8C6239] focus:border-[#C5A059]'}`}
+                  >
+                    <option value="">Choisis ta zone</option>
+                    {deliveryZones.map((zone) => (
+                      <option key={zone.value} value={zone.value}>
+                        {zone.value} — {zone.price.toLocaleString('fr-FR')} F CFA
+                      </option>
+                    ))}
+                  </select>
+                  {errors.deliveryZone && <p className="mt-1 text-xs text-red-500">{errors.deliveryZone}</p>}
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-[#F1D8BF] bg-[#FEF8F1] px-4 py-3 text-sm text-[#8C6239]">
+                  <p className="font-semibold">Frais de livraison</p>
+                  <p className="mt-1 text-sm text-[#8C6239]/80">
+                    {deliveryPrice > 0 ? `${deliveryPrice.toLocaleString('fr-FR')} F CFA` : 'Sélectionne une zone pour voir le montant'}
+                  </p>
                 </div>
 
                 <button
@@ -258,6 +356,41 @@ export default function CheckoutPage() {
                   })}
                 </div>
 
+                <div className="rounded-2xl border border-[#F1D8BF] bg-[#FEF8F1] p-4 text-sm text-[#8C6239]">
+                  <p className="font-semibold">Montant à payer</p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => { setPaymentChoice('full'); setErrors((prev) => ({ ...prev, paymentChoice: '' })) }}
+                      className={`rounded-xl border-2 p-3 text-left transition-all ${paymentChoice === 'full' ? 'border-[#8C6239] bg-white' : 'border-[#ead7c7] bg-white/60 hover:border-[#dcb99f]'}`}
+                    >
+                      <p className="text-sm font-semibold text-[#8C6239]">Payer la totalité</p>
+                      <p className="mt-1 text-xs text-[#8C6239]/65">{formatPrice(orderTotalWithDelivery)}</p>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={paymentDetails ? !paymentDetails.canOfferDeposit : false}
+                      onClick={() => { setPaymentChoice('deposit'); setErrors((prev) => ({ ...prev, paymentChoice: '' })) }}
+                      className={`rounded-xl border-2 p-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-40 ${paymentChoice === 'deposit' ? 'border-[#8C6239] bg-white' : 'border-[#ead7c7] bg-white/60 hover:border-[#dcb99f]'}`}
+                    >
+                      <p className="text-sm font-semibold text-[#8C6239]">Payer un acompte</p>
+                      <p className="mt-1 text-xs text-[#8C6239]/65">
+                        {paymentDetails?.canOfferDeposit === false
+                          ? 'Non disponible (total trop bas)'
+                          : formatPrice(paymentDetails?.depositAmount || 2020)}
+                      </p>
+                    </button>
+                  </div>
+                  {errors.paymentChoice && <p className="mt-3 text-xs text-red-500">{errors.paymentChoice}</p>}
+                  {paymentDetails && paymentChoice && (
+                    <p className="mt-3 text-xs text-[#8C6239]/65">
+                      Tu paies <span className="font-semibold">{formatPrice(paymentDetails.paymentAmount)}</span> via {getPaymentMethodDetails(method, { number: paymentConfig.paymentNumbers?.[method] || undefined }).label}.
+                      {paymentDetails.remainingAtDelivery > 0 && (
+                        <> Reste à payer à la livraison : <span className="font-semibold">{formatPrice(paymentDetails.remainingAtDelivery)}</span>.</>
+                      )}
+                    </p>
+                  )}
+                </div>
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => setStep(1)} className="flex-1 rounded-full border border-[#C5A059]/25 bg-white px-4 py-3 text-sm font-medium text-[#8C6239] hover:bg-[#F9EAE1] transition-colors">
                     Modifier infos
@@ -270,6 +403,13 @@ export default function CheckoutPage() {
                     {loading ? <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" /> : <><Smartphone size={15} /> Finaliser</>}
                   </button>
                 </div>
+
+                <div className="mt-6 rounded-2xl border border-[#C5A059]/18 bg-[#fffaf5] p-4 text-sm text-[#8C6239]">
+                  <p className="font-semibold">Besoin d'aide ?</p>
+                  <p className="mt-2 text-xs leading-relaxed text-[#8C6239]/75">
+                    Si tu as un souci avec le paiement, contacte-nous via WhatsApp au <span className="font-semibold">{paymentConfig.whatsapp || '2250702396063'}</span> ou appelle le service client au <span className="font-semibold">{paymentConfig.infoline || paymentConfig.whatsapp || '2250702396063'}</span>.
+                  </p>
+                </div>
               </motion.section>
             )}
 
@@ -280,7 +420,10 @@ export default function CheckoutPage() {
                 </div>
                 <h2 className="text-2xl font-semibold text-[#8C6239]">Commande {order?.orderNumber} enregistree</h2>
                 <p className="mt-2 text-sm text-[#8C6239]/65">
-                  Paiement a effectuer via {getPaymentMethodDetails(method).label} sur le numero {getPaymentMethodDetails(method).number}.
+                  Effectue le paiement de <span className="font-semibold">{formatPrice(order?.paymentAmount || 0)}</span> via {getPaymentMethodDetails(method).label} sur le numero {(paymentConfig.paymentNumbers?.[method] || getPaymentMethodDetails(method).number)}.
+                </p>
+                <p className="mt-2 text-xs text-[#8C6239]/55">
+                  Ta commande reste <span className="font-semibold">en attente</span> tant que le paiement n'a pas été confirmé par notre équipe. Tu peux l'annuler dans les 10 minutes depuis "Mes commandes" si besoin.
                 </p>
                 <p className="mt-1 text-xs text-[#8C6239]/45">Reference: {order?.orderNumber}</p>
 
@@ -307,9 +450,19 @@ export default function CheckoutPage() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 border-t border-[#F9EAE1] pt-4 flex items-center justify-between text-sm font-semibold">
-                <span className="text-[#8C6239]">Total</span>
-                <span className="text-[#C5A059]">{formatPrice(total)}</span>
+              <div className="mt-4 space-y-2 border-t border-[#F9EAE1] pt-4 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#8C6239]/70">Sous-total</span>
+                  <span className="font-medium text-[#8C6239]">{formatPrice(total)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#8C6239]/70">Livraison</span>
+                  <span className="font-medium text-[#8C6239]">{formatPrice(deliveryPrice)}</span>
+                </div>
+                <div className="flex items-center justify-between font-semibold">
+                  <span className="text-[#8C6239]">Total</span>
+                  <span className="text-[#C5A059]">{formatPrice(orderTotalWithDelivery)}</span>
+                </div>
               </div>
             </aside>
           )}

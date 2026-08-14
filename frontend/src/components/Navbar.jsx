@@ -5,6 +5,7 @@ import { Heart, ShoppingBag, Search, User, Phone, Mail, Menu, X } from 'lucide-r
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
+import { useSiteConfig } from '../hooks/useSiteConfig'
 import { getProductVisual } from '../utils/productVisuals'
 import { formatPrice } from '../utils/payment'
 import logoNoor from '../assets/logo noor al.jpeg'
@@ -12,7 +13,8 @@ import logoNoor from '../assets/logo noor al.jpeg'
 export default function Navbar() {
   const { count, items: cartItems, total } = useCart()
   const { count: wishCount, items: wishlistItems } = useWishlist()
-  const { isUserAuthenticated, logoutUser } = useAuth()
+  const { user, isUserAuthenticated, logoutUser } = useAuth()
+  const { config } = useSiteConfig()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -20,7 +22,8 @@ export default function Navbar() {
   const previewRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const managerWhatsAppLink = 'https://wa.me/2250702396063?text=Bonjour%20Noor%20Al%20Hayaa%2C%20je%20souhaite%20des%20informations%20sur%20vos%20articles.'
+  const whatsappNumber = config.whatsapp || '2250702396063'
+  const managerWhatsAppLink = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=Bonjour%20Noor%20Al%20Hayaa%2C%20je%20souhaite%20des%20informations%20sur%20vos%20articles.`
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
@@ -129,15 +132,22 @@ export default function Navbar() {
             </button>
             {isUserAuthenticated ? (
               <>
+                <div className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border transition-all ${
+                    transparentMode
+                      ? 'border-white/40 text-white hover:bg-white hover:text-[#8C6239]'
+                      : 'border-[#C5A059] bg-[#C5A059] text-white hover:bg-white hover:text-[#8C6239]'
+                  }`}>
+                  <User size={12} /> {user?.name || 'Mon compte'}
+                </div>
                 <Link
-                  to="/orders"
+                  to="/account"
                   className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border transition-all ${
                     transparentMode
                       ? 'border-white/40 text-white hover:bg-white hover:text-[#8C6239]'
                       : 'border-[#C5A059] bg-[#C5A059] text-white hover:bg-white hover:text-[#8C6239]'
                   }`}
                 >
-                  <User size={12} /> Mes commandes
+                  Mon compte
                 </Link>
                 <button
                   onClick={logoutUser}
@@ -153,6 +163,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
+                state={{ from: location.pathname }}
                 className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border transition-all ${
                   transparentMode
                     ? 'border-white/40 text-white hover:bg-white hover:text-[#8C6239]'
@@ -203,7 +214,7 @@ export default function Navbar() {
                             <Link key={item.id} to={`/product/${item.id}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-[#F9EAE1] transition-colors">
                               <div className="relative h-12 w-10 overflow-hidden rounded-lg">
                                 <div className="absolute inset-0" style={{ background: visual.background }} />
-                                <img src={visual.image} alt={item.name} className="absolute inset-0 h-full w-full object-cover" />
+                                <img src={visual.image} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                               </div>
                               <div className="min-w-0">
                                 <p className="truncate text-xs font-medium text-[#8C6239]">{item.name}</p>
@@ -232,7 +243,7 @@ export default function Navbar() {
                             <Link key={item.key} to="/cart" className="flex items-center gap-3 rounded-xl p-2 hover:bg-[#F9EAE1] transition-colors">
                               <div className="relative h-12 w-10 overflow-hidden rounded-lg">
                                 <div className="absolute inset-0" style={{ background: visual.background }} />
-                                <img src={visual.image} alt={item.name} className="absolute inset-0 h-full w-full object-cover" />
+                                <img src={visual.image} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-medium text-[#8C6239]">{item.name}</p>
@@ -267,11 +278,14 @@ export default function Navbar() {
               <li key={to + label}>
                 <Link
                   to={to}
-                  className={`px-3 py-1.5 inline-block transition-colors ${
-                    transparentMode
+                  className={`px-3 py-1.5 inline-block rounded-full transition-colors ${
+                    label === 'Homme'
+                      ? 'border border-[#8C6239]/15 bg-[#f7e6d5] text-[#8C6239] opacity-80 hover:text-[#8C6239]'
+                      : transparentMode
                       ? 'text-white hover:text-[#F9EAE1]'
                       : 'text-[#8C6239] hover:text-[#C5A059]'
                   }`}
+                  aria-disabled={label === 'Homme'}
                 >
                   {label}
                 </Link>
@@ -306,7 +320,7 @@ export default function Navbar() {
                 </div>
               </form>
               {[
-                ['Accueil', '/'], ['Boutique', '/shop'], ['Femme', '/femme'], ['Homme', '/homme'], ['Favoris', '/wishlist'], ['Panier', '/cart'], ['Mes commandes', '/orders'],
+                ['Accueil', '/'], ['Boutique', '/shop'], ['Femme', '/femme'], ['Homme', '/homme'], ['Favoris', '/wishlist'], ['Panier', '/cart'], ['Mon compte', '/account'],
               ].map(([label, to]) => (
                 <Link
                   key={to + label}

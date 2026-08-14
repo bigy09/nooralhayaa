@@ -86,7 +86,7 @@ function CollectionCard({ product, index }) {
       className="group relative overflow-hidden rounded-[1.9rem] border-2 border-white bg-[#f4d3cb]/35 shadow-[0_18px_45px_rgba(140,98,57,0.14)] transition-all hover:shadow-[0_26px_56px_rgba(140,98,57,0.2)]"
     >
       <div className="pointer-events-none absolute -top-8 left-3 z-[2] h-20 w-20 rounded-full border-[6px] border-[#f0b8b3] bg-[#f9deda]/70 blur-[0.2px]" />
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#f4e4d9]">
+      <div className="relative aspect-[3/4] overflow-hidden bg-[#f4e4d9]">
         <div className="absolute inset-0 opacity-95" style={{ background: visual.background }} />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(255,255,255,0.45),transparent_40%)]" />
         <motion.div
@@ -304,14 +304,7 @@ export default function HomePage() {
         />
       )}
 
-      {!productsLoading && (
-        <SegmentSlider
-          id="homme"
-          title="Sélection Homme"
-          subtitle="Pieces homme essentielles et faciles a porter."
-          products={menProducts}
-        />
-      )}
+      {/* Homme selection hidden — partie Homme indisponible */}
     </div>
   )
 }

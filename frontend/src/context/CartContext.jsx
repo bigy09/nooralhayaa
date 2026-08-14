@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
 import { buildApiUrl } from '../utils/api'
+import { getSessionId } from '../utils/session'
 
 const CartContext = createContext(null)
 
@@ -37,7 +38,11 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     let alive = true
-    fetch(buildApiUrl('/api/cart'))
+    fetch(buildApiUrl('/api/cart'), {
+      headers: {
+        'x-session-id': getSessionId(),
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         if (!alive || !Array.isArray(data.items)) return
@@ -57,7 +62,10 @@ export function CartProvider({ children }) {
     if (!hydrated.current) return
     fetch(buildApiUrl('/api/cart'), {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-id': getSessionId(),
+      },
       body: JSON.stringify({ items: state.items }),
     }).catch(() => {})
   }, [state.items])

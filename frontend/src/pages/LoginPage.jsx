@@ -12,15 +12,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const nextPath = location.state?.from || '/checkout'
+  const nextPath = location.state?.from || '/account'
 
   async function onSubmit(event) {
     event.preventDefault()
     setLoading(true)
     setError('')
     try {
-      await login({ email, password })
-      navigate(nextPath, { replace: true })
+      const payload = await login({ email, password })
+      if (payload?.isAdmin) {
+        navigate('/admin', { replace: true })
+      } else {
+        navigate(nextPath, { replace: true })
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -79,7 +83,7 @@ export default function LoginPage() {
 
         <p className="mt-5 text-sm text-[#8C6239]/65">
           Pas encore de compte ?{' '}
-          <Link to="/register" className="font-semibold text-[#C5A059] hover:text-[#8C6239]">
+          <Link to="/register" state={{ from: nextPath }} className="font-semibold text-[#C5A059] hover:text-[#8C6239]">
             Creer un compte
           </Link>
         </p>

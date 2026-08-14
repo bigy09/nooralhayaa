@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Star, ShoppingBag, Heart } from 'lucide-react'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import { formatPrice } from '../utils/payment'
 
 function Stars({ rating }) {
@@ -21,6 +22,7 @@ function Stars({ rating }) {
 
 export default function ProductCard2({ product, index = 0 }) {
   const { add } = useCart()
+  const { toggle, isLiked } = useWishlist()
 
   function quickAdd(e) {
     e.preventDefault()
@@ -35,11 +37,15 @@ export default function ProductCard2({ product, index = 0 }) {
       transition={{ delay: index * 0.07, duration: 0.45 }}
     >
       <Link to={`/product/${product.id}`} className="group block">
-        <div className="relative rounded-2xl overflow-hidden bg-gray-50 aspect-[3/4]">
+        <div className="relative rounded-2xl overflow-hidden bg-gray-50 aspect-[3/4] sm:aspect-[4/5]">
           {/* Swatch visual (placeholder for real image) */}
           <div className="absolute inset-0 flex">
-            {product.swatches.map((color, i) => (
-              <div key={i} className="flex-1 h-full transition-transform duration-500 group-hover:scale-110" style={{ backgroundColor: color }} />
+            {(product.swatches || []).map((swatch, i) => (
+              <div
+                key={i}
+                className="flex-1 h-full transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundColor: (swatch && (swatch.color || swatch)) || 'transparent' }}
+              />
             ))}
           </div>
 
@@ -54,8 +60,12 @@ export default function ProductCard2({ product, index = 0 }) {
           )}
 
           {/* Wishlist */}
-          <button className="absolute top-2.5 right-2.5 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300">
-            <Heart size={14} className="text-gray-500" />
+          <button
+            onClick={(e) => { e.preventDefault(); toggle(product) }}
+            className={`absolute top-2.5 right-2.5 w-8 h-8 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 ${isLiked(product.id) ? 'text-red-400' : 'text-gray-500'}`}
+            aria-label={isLiked(product.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <Heart size={14} fill={isLiked(product.id) ? 'currentColor' : 'none'} />
           </button>
 
           {/* Quick add */}

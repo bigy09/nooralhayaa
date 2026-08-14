@@ -1,0 +1,6 @@
+{
+  "watch": ["index.js", "middleware", "models", "services", "db-adapter.js", "mockDb.js"],
+  "ignore": ["db.json", "*.json", ".env*", "node_modules"],
+  "ext": "js",
+  "delay": 500
+}

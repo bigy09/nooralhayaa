@@ -8,7 +8,7 @@ export function ProtectedAdminRoute({ children }) {
     return <div className="min-h-screen bg-[#F9EAE1] pt-32 px-4 text-center text-[#8C6239]/70">Verification admin...</div>
   }
 
-  if (!isAdminAuthenticated) return <Navigate to="/admin/login" replace />
+  if (!isAdminAuthenticated) return <Navigate to="/login" replace />
 
   return children
 }

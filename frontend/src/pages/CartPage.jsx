@@ -56,7 +56,7 @@ export default function CartPage() {
                   >
                     <Link to={`/product/${item.id}`} className="relative h-28 w-24 flex-shrink-0 overflow-hidden rounded-[1rem]">
                       <div className="absolute inset-0" style={{ background: visual.background }} />
-                      <img src={visual.image} alt={item.name} className="absolute inset-0 h-full w-full object-cover" />
+                      <img src={visual.image} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                     </Link>
                     <div className="flex flex-1 min-w-0 flex-col justify-between">
                       <div className="flex items-start justify-between gap-2">
@@ -93,7 +93,7 @@ export default function CartPage() {
               <h2 className="text-lg font-semibold text-[#8C6239] mb-5">Récapitulatif</h2>
               <div className="space-y-3 text-sm text-[#8C6239]/75">
                 <div className="flex justify-between"><span>Sous-total</span><span className="font-medium text-[#8C6239]">{formatPrice(total)}</span></div>
-                <div className="flex justify-between"><span>Livraison</span><span className="font-medium text-green-600">Gratuite</span></div>
+                <p className="text-xs text-[#8C6239]/50">Frais de livraison calculés à l'étape suivante selon ta zone.</p>
                 <div className="border-t border-[#F9EAE1] pt-4 flex justify-between text-base font-bold text-[#8C6239]"><span>Total</span><span className="text-[#C5A059]">{formatPrice(total)}</span></div>
               </div>
               <Link to="/checkout" className="mt-6 flex items-center justify-center gap-2 w-full rounded-full bg-[#8C6239] py-4 text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#C5A059]">Commander <ArrowRight size={16} /></Link>

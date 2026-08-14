@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { buildApiUrl } from '../utils/api'
+import { getSessionId } from '../utils/session'
 
 const AuthContext = createContext(null)
 
@@ -14,8 +15,9 @@ function parseError(payload, fallback) {
 }
 
 export function AuthProvider({ children }) {
-  const [userToken, setUserToken] = useState(localStorage.getItem(USER_TOKEN_KEY) || '')
-  const [adminToken, setAdminToken] = useState(localStorage.getItem(ADMIN_TOKEN_KEY) || '')
+  const storage = typeof globalThis !== 'undefined' ? globalThis.localStorage : null
+  const [userToken, setUserToken] = useState(storage?.getItem(USER_TOKEN_KEY) || '')
+  const [adminToken, setAdminToken] = useState(storage?.getItem(ADMIN_TOKEN_KEY) || '')
   const [user, setUser] = useState(null)
   const [admin, setAdmin] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -23,46 +25,62 @@ export function AuthProvider({ children }) {
   const activeToken = adminToken || userToken
 
   const clearUserAuth = useCallback(() => {
-    localStorage.removeItem(USER_TOKEN_KEY)
+    storage?.removeItem(USER_TOKEN_KEY)
     setUserToken('')
     setUser(null)
-  }, [])
+  }, [storage])
 
   const clearAdminAuth = useCallback(() => {
-    localStorage.removeItem(ADMIN_TOKEN_KEY)
+    storage?.removeItem(ADMIN_TOKEN_KEY)
     setAdminToken('')
     setAdmin(null)
-  }, [])
+  }, [storage])
 
   const storeUserAuth = useCallback((payload) => {
-    if (payload.token) {
-      localStorage.setItem(USER_TOKEN_KEY, payload.token)
-      setUserToken(payload.token)
-    }
-    if (payload.user) setUser(payload.user)
-  }, [])
+    if (!payload?.token) return
+    storage?.setItem(USER_TOKEN_KEY, payload.token)
+    setUserToken(payload.token)
+    setUser(payload.user)
+    clearAdminAuth()
+  }, [clearAdminAuth, storage])
 
   const storeAdminAuth = useCallback((payload) => {
-    if (payload.token) {
-      localStorage.setItem(ADMIN_TOKEN_KEY, payload.token)
-      setAdminToken(payload.token)
+    if (!payload?.token) return
+    storage?.setItem(ADMIN_TOKEN_KEY, payload.token)
+    setAdminToken(payload.token)
+    setAdmin(payload.user)
+    clearUserAuth()
+  }, [clearUserAuth, storage])
+
+  const storeAuth = useCallback((payload) => {
+    if (!payload?.token) return
+    const role = payload?.user?.role || (payload?.isAdmin ? 'admin' : 'user')
+
+    if (role === 'admin') {
+      storeAdminAuth(payload)
+    } else {
+      storeUserAuth(payload)
     }
-    if (payload.user) setAdmin(payload.user)
+  }, [storeAdminAuth, storeUserAuth])
+
+  const updateUser = useCallback((updatedUser) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedUser } : updatedUser))
   }, [])
 
   const requestJson = useCallback(async (url, options = {}, token = '') => {
     const headers = {
       ...(options.headers || {}),
+      'x-session-id': getSessionId(),
     }
 
     if (token) headers.Authorization = `Bearer ${token}`
 
-    const response = await fetch(buildApiUrl(url), { ...options, headers, credentials: 'include' })
-    let payload = null
+    const response = await globalThis.fetch(buildApiUrl(url), { ...options, headers, credentials: 'include' })
+    let payload = { error: `HTTP ${response.status} ${response.statusText}`.trim() }
     try {
       payload = await response.json()
-    } catch (_error) {
-      payload = { error: `HTTP ${response.status} ${response.statusText}`.trim() }
+    } catch {
+      // keep fallback error payload
     }
 
     return { response, payload }
@@ -81,11 +99,9 @@ export function AuthProvider({ children }) {
       return null
     }
 
-    if (role === 'admin') storeAdminAuth(payload)
-    else storeUserAuth(payload)
-
+    storeAuth(payload)
     return payload.token
-  }, [clearAdminAuth, clearUserAuth, requestJson, storeAdminAuth, storeUserAuth])
+  }, [clearAdminAuth, clearUserAuth, requestJson, storeAuth])
 
   const authFetch = useCallback(async (url, options = {}, tokenOverride = null) => {
     const requestedToken = tokenOverride || activeToken
@@ -115,7 +131,7 @@ export function AuthProvider({ children }) {
         let me = null
         try {
           me = await authFetch('/api/auth/me', {}, adminToken)
-        } catch (_error) {
+        } catch {
           const refreshed = await refreshForRole('admin')
           if (refreshed) me = await authFetch('/api/auth/me', {}, refreshed)
         }
@@ -131,7 +147,7 @@ export function AuthProvider({ children }) {
         let me = null
         try {
           me = await authFetch('/api/auth/me', {}, userToken)
-        } catch (_error) {
+        } catch {
           const refreshed = await refreshForRole('user')
           if (refreshed) me = await authFetch('/api/auth/me', {}, refreshed)
         }
@@ -142,28 +158,32 @@ export function AuthProvider({ children }) {
           clearUserAuth()
         }
       }
-    } catch (_error) {
+    } catch (error) {
       if (adminToken) clearAdminAuth()
       if (userToken) clearUserAuth()
+      console.debug('hydrate failed', error)
     } finally {
       setLoading(false)
     }
   }, [adminToken, authFetch, clearAdminAuth, clearUserAuth, refreshForRole, userToken])
 
   useEffect(() => {
-    hydrate()
+    async function initialize() {
+      await hydrate()
+    }
+    void initialize()
   }, [hydrate])
 
-  const register = useCallback(async ({ email, password }) => {
+  const register = useCallback(async ({ name, email, password, preferredLocation }) => {
     const payload = await authFetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ name, email, password, preferredLocation }),
     }, '')
 
-    storeUserAuth(payload)
+    storeAuth(payload)
     return payload
-  }, [authFetch, storeUserAuth])
+  }, [authFetch, storeAuth])
 
   const login = useCallback(async ({ email, password }) => {
     const payload = await authFetch('/api/auth/login', {
@@ -172,20 +192,9 @@ export function AuthProvider({ children }) {
       body: JSON.stringify({ email, password }),
     }, '')
 
-    storeUserAuth(payload)
+    storeAuth(payload)
     return payload
-  }, [authFetch, storeUserAuth])
-
-  const loginAdmin = useCallback(async ({ email, password }) => {
-    const payload = await authFetch('/api/auth/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    }, '')
-
-    storeAdminAuth(payload)
-    return payload
-  }, [authFetch, storeAdminAuth])
+  }, [authFetch, storeAuth])
 
   const logoutUser = useCallback(async () => {
     try {
@@ -194,7 +203,9 @@ export function AuthProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: 'user' }),
       })
-    } catch (_error) {
+    } catch (error) {
+      // ignore logout errors
+      console.debug('logoutUser failed', error)
     }
     clearUserAuth()
   }, [clearUserAuth, requestJson])
@@ -206,7 +217,9 @@ export function AuthProvider({ children }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: 'admin' }),
       })
-    } catch (_error) {
+    } catch (error) {
+      // ignore logout errors
+      console.debug('logoutAdmin failed', error)
     }
     clearAdminAuth()
   }, [clearAdminAuth, requestJson])
@@ -222,10 +235,10 @@ export function AuthProvider({ children }) {
     authFetch,
     register,
     login,
-    loginAdmin,
     logoutUser,
     logoutAdmin,
-  }), [admin, adminToken, authFetch, loading, login, loginAdmin, logoutAdmin, logoutUser, register, user, userToken])
+    updateUser,
+  }), [admin, adminToken, authFetch, loading, login, logoutAdmin, logoutUser, register, updateUser, user, userToken])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

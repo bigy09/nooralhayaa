@@ -16,6 +16,13 @@ export class EmailService {
     this.emailUser = emailUser;
     this.emailPassword = emailPassword;
     this.merchantEmail = merchantEmail || emailUser;
+    this.disabled = !emailUser || !emailPassword;
+
+    if (this.disabled) {
+      this.transporter = null;
+      return;
+    }
+
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -25,11 +32,15 @@ export class EmailService {
     });
   }
 
+  canSend() {
+    return !this.disabled && this.transporter;
+  }
+
   /**
    * Send order confirmation to merchant
    */
   async sendOrderConfirmation(order) {
-    if (!this.emailUser || !this.emailPassword) {
+    if (!this.canSend()) {
       console.warn('Email service not configured - skipping order confirmation');
       return null;
     }
@@ -137,7 +148,7 @@ export class EmailService {
    * Send payment received notification
    */
   async sendPaymentConfirmation(order) {
-    if (!this.emailUser || !this.emailPassword) return null;
+    if (!this.canSend()) return null;
 
     const htmlContent = `
       <html>
@@ -170,7 +181,7 @@ export class EmailService {
    * Send shipment notification
    */
   async sendShipmentNotification(order, trackingInfo) {
-    if (!this.emailUser || !this.emailPassword) return null;
+    if (!this.canSend()) return null;
 
     const htmlContent = `
       <html>
@@ -209,9 +220,101 @@ export class EmailService {
   }
 
   /**
+   * Send order confirmation to customer (buyer)
+   */
+  async sendCustomerOrderConfirmation(order) {
+    if (!this.canSend()) return null;
+    if (!order?.customer?.email) return null;
+
+    const itemsHtml = order.items
+      .map(
+        (item) => `
+        <tr>
+          <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+          <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toLocaleString('fr-FR')} XOF</td>
+        </tr>
+      `
+      )
+      .join('');
+
+    const htmlContent = `
+      <html>
+        <body style="font-family: Arial, sans-serif; color: #333;">
+          <div style="max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #C5A059;">Merci pour votre commande - ${order.orderNumber}</h2>
+            <p>Bonjour ${order.customer.name},</p>
+            <p>Nous avons bien reçu votre commande. Voici le récapitulatif :</p>
+            <table style="width:100%; border-collapse: collapse; margin-top:10px;">
+              <thead>
+                <tr style="background: #F9EAE1;">
+                  <th style="padding:8px; text-align:left">Article</th>
+                  <th style="padding:8px; text-align:center">Quantité</th>
+                  <th style="padding:8px; text-align:right">Prix</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+            <p style="margin-top:12px;"><strong>Total:</strong> ${Number(order.total || 0).toLocaleString('fr-FR')} XOF</p>
+            <p>Statut actuel: <strong>${order.status}</strong></p>
+            <p style="margin-top:20px;">Nous vous contacterons pour la suite du traitement. Merci pour votre confiance.</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    try {
+      const info = await this.transporter.sendMail({
+        from: this.emailUser,
+        to: order.customer.email,
+        subject: `Votre commande ${order.orderNumber} - Noor Al Hayaa`,
+        html: htmlContent,
+      });
+      console.log(`✅ Customer confirmation email sent: ${info.messageId}`);
+      return info;
+    } catch (err) {
+      console.error('Failed to send customer confirmation:', err.message);
+      return null;
+    }
+  }
+
+  /**
+   * Send status update email to customer
+   */
+  async sendCustomerStatusUpdate(order, status) {
+    if (!this.canSend()) return null;
+    if (!order?.customer?.email) return null;
+
+    const subject = `Mise à jour commande ${order.orderNumber}: ${status}`;
+    const html = `
+      <html><body style="font-family: Arial, sans-serif; color:#333;">
+        <div style="max-width:600px;margin:0 auto;">
+          <h2 style="color:#C5A059;">Mise à jour de votre commande</h2>
+          <p>Bonjour ${order.customer.name},</p>
+          <p>Le statut de votre commande <strong>${order.orderNumber}</strong> a changé: <strong>${status}</strong>.</p>
+          <p>Merci pour votre confiance.</p>
+        </div>
+      </body></html>
+    `;
+
+    try {
+      await this.transporter.sendMail({ from: this.emailUser, to: order.customer.email, subject, html });
+    } catch (err) {
+      console.error('Failed to send status update to customer:', err.message);
+    }
+  }
+
+  /**
    * Test email connection
    */
   async testConnection() {
+    if (!this.canSend()) {
+      console.warn('Email service not configured - skipping connection test');
+      return false;
+    }
+
     try {
       await this.transporter.verify();
       console.log('✅ Email service connected');

@@ -1,5 +1,6 @@
 import { createContext, useContext, useReducer, useCallback, useEffect, useRef } from 'react'
 import { buildApiUrl } from '../utils/api'
+import { getSessionId } from '../utils/session'
 
 const WishlistContext = createContext(null)
 
@@ -36,7 +37,11 @@ export function WishlistProvider({ children }) {
 
   useEffect(() => {
     let alive = true
-    fetch(buildApiUrl('/api/wishlist'))
+    fetch(buildApiUrl('/api/wishlist'), {
+      headers: {
+        'x-session-id': getSessionId(),
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         if (!alive || !Array.isArray(data.items)) return
@@ -55,7 +60,10 @@ export function WishlistProvider({ children }) {
     if (!hydrated.current) return
     fetch(buildApiUrl('/api/wishlist'), {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-id': getSessionId(),
+      },
       body: JSON.stringify({ items: state.items }),
     }).catch(() => {})
   }, [state.items])

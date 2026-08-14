@@ -9,24 +9,12 @@ const MOBILE_MONEY_METHODS = {
   orange: { label: 'Orange Money', number: '0716557419', operator: 'Orange' },
 }
 
-export function getPaymentMethodDetails(method) {
-  return MOBILE_MONEY_METHODS[method] || MOBILE_MONEY_METHODS.orange
+export function getPaymentMethodDetails(method, overrides = {}) {
+  const methodInfo = MOBILE_MONEY_METHODS[method] || MOBILE_MONEY_METHODS.orange
+  return { ...methodInfo, ...overrides }
 }
 
-export function generateMobileMoneyLink(method) {
-  const details = getPaymentMethodDetails(method)
-  return `tel:${details.number}`
-}
-
-export function generatePaymentMessage({ orderNumber, total, method }) {
-  const details = getPaymentMethodDetails(method)
-  return `Commande ${orderNumber || 'N/A'} | ${formatPrice(total)} | Paiement ${details.label} au ${details.number}`
-}
-
-// Alternative: PayDunya (West African payment processor)
-export function generatePaydunyaLink({ total, orderNumber }) {
-  const apiKey = import.meta.env.VITE_PAYDUNYA_API_KEY
-  if (!apiKey) return null
-  
-  return `https://paydunya.com/checkout/${apiKey}?invoice_id=${orderNumber}&amount=${total}`
+export function generateMobileMoneyLink(method, number) {
+  const details = number ? { number } : getPaymentMethodDetails(method)
+  return details.number ? `tel:${details.number}` : null
 }

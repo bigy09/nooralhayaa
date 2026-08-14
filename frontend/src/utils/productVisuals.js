@@ -1,12 +1,12 @@
-import femme1 from '../assets/femme 1.jpg'
-import femme2 from '../assets/femme 2.jpg'
-import femme3 from '../assets/femme 3.jpg'
-import femme4 from '../assets/femme 4.jpg'
-import femme5 from '../assets/femme 5.jpg'
-import homme1 from '../assets/homme 1.jpg'
-import homme2 from '../assets/homme 2.jpg'
-import homme3 from '../assets/homme 3.jpg'
-import homme4 from '../assets/homme 4.jpg'
+import femme1 from '../assets/abaya-nour.jpg'
+import femme2 from '../assets/robe-safa.jpg'
+import femme3 from '../assets/kimono-haya.jpg'
+import femme4 from '../assets/robe-rahma.jpg'
+import femme5 from '../assets/ensemble-samira.jpg'
+import homme1 from '../assets/boubou-omar.jpg'
+import homme2 from '../assets/qamis-bilal.jpg'
+import homme3 from '../assets/boubou-nabil.jpg'
+import homme4 from '../assets/grand-boubou-youssef.jpg'
 
 const visualsByName = {
   // ── Femme ──────────────────────────────────────────────────────────────────

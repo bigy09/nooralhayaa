@@ -1,0 +1,42 @@
+{
+  "products": [
+    {
+      "_id": "1784111171960",
+      "name": "Abaya Nour",
+      "description": "Abaya deux pièces marine et robe bleu ciel. Tissu fluide premium, coupe élancée avec voile assorti.",
+      "price": 22000,
+      "categorySlug": "kimonos",
+      "inventory": 12,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.9,
+      "sizes": ["S","M","L","XL"],
+      "swatches": [],
+      "updatedAt": "2026-08-04T09:04:33.245Z"
+    },
+    {
+      "_id": "1784111171961",
+      "name": "Robe Safa",
+      "description": "Robe longue avec manches évasées à volants papillon. Silhouette sculptante, tissu extensible confortable.",
+      "price": 19000,
+      "categorySlug": "robes",
+      "inventory": 18,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.8,
+      "sizes": ["S","M","L","XL"],
+      "swatches": [],
+      "updatedAt": "2026-08-04T09:04:33.246Z"
+    }
+  ],
+  "categories": [
+    { "slug": "kimonos", "name": "Abayas & Kimonos", "image": "" },
+    { "slug": "robes", "name": "Robes Longues", "image": "" }
+  ]
+  ,
+  "users": []
+}

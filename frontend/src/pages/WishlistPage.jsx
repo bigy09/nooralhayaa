@@ -37,6 +37,7 @@ function WishlistCard({ product, index }) {
         <img
           src={visual.image}
           alt={product.name}
+          loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/20 to-transparent" />

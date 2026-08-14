@@ -1,0 +1,476 @@
+{
+  "users": [
+    {
+      "email": "admin@nooralhayaa.test",
+      "passwordHash": "$2b$12$VlQVBh.rnuW2Q9VEgCFgRexgJlRFfLQyJwgCv.NDoTgfo6U50EWtm",
+      "role": "admin",
+      "_id": "1786610395996",
+      "createdAt": "2026-08-13T08:39:55.996Z",
+      "updatedAt": "2026-08-13T10:16:25.762Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": []
+    },
+    {
+      "name": "TestUser_1786611105019",
+      "email": "testuser_1786611105019@example.test",
+      "preferredLocation": "",
+      "passwordHash": "$2b$12$PZrT5qV.4qySx86i4jX5jOI02A4UJ7VwK7TGO32vUeT0XMDWr2WTm",
+      "role": "user",
+      "_id": "1786611106000",
+      "createdAt": "2026-08-13T08:51:46.000Z",
+      "updatedAt": "2026-08-13T08:51:46.008Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "36f9d7ae7c183d71176900f7103757d10b64a73fd520307b",
+          "tokenHash": "b3414318c1c3ff204761ec1b634ea268aff9fd26ac55834452ad831c279160c3",
+          "role": "user",
+          "expiresAt": "2026-09-12T08:51:46.000Z",
+          "lastUsedAt": "2026-08-13T08:51:46.008Z"
+        }
+      ]
+    },
+    {
+      "name": "TestUser_1786611273554",
+      "email": "testuser_1786611273554@example.test",
+      "preferredLocation": "",
+      "passwordHash": "$2b$12$K0m09JwDRKTB8I/L6/ZwHujyHTCTEuOFx2gW1x0adrqaGH1XT7RUC",
+      "role": "user",
+      "_id": "1786611274340",
+      "createdAt": "2026-08-13T08:54:34.340Z",
+      "updatedAt": "2026-08-13T08:54:34.344Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "3bfff6d1a51e25e1ffb2eaa43f04915d4da254e304386eb3",
+          "tokenHash": "e26273004695d6083862a9d851ae8689232f899b20814c746c5b30a5bd7c6f2f",
+          "role": "user",
+          "expiresAt": "2026-09-12T08:54:34.000Z",
+          "lastUsedAt": "2026-08-13T08:54:34.344Z"
+        }
+      ]
+    },
+    {
+      "name": "TestUser_1786611424765",
+      "email": "testuser_1786611424765@example.test",
+      "preferredLocation": "",
+      "passwordHash": "$2b$12$qGkkltJYLyanZ.ETrUZQT.inAvb7FbYb3qGCTzyMmKKxt6OgsE5MW",
+      "role": "user",
+      "_id": "1786611425691",
+      "createdAt": "2026-08-13T08:57:05.691Z",
+      "updatedAt": "2026-08-13T08:57:05.698Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "4b197658017320a92f3826f828983973edcee59ebf67d8d9",
+          "tokenHash": "e0003cf651b31db8950ab86a9cda4f38b5b3cced0d74a2900dbf9d4d690747c7",
+          "role": "user",
+          "expiresAt": "2026-09-12T08:57:05.000Z",
+          "lastUsedAt": "2026-08-13T08:57:05.697Z"
+        }
+      ]
+    },
+    {
+      "name": "TestUser_1786612259615",
+      "email": "testuser_1786612259615@example.test",
+      "preferredLocation": "",
+      "passwordHash": "$2b$12$N0u5pqARZv/94VfTsjj49eYVAQfZo.DeEIZZK0Nb/BD1q42Uk0P9S",
+      "role": "user",
+      "_id": "1786612260406",
+      "createdAt": "2026-08-13T09:11:00.406Z",
+      "updatedAt": "2026-08-13T09:11:00.412Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "4ab35249e16cb225f0964ba9089713f63e78c8c1279cefe4",
+          "tokenHash": "fefaf56754994753b5aee63fc89e8c216f6438ad7196796d504796f640e48a73",
+          "role": "user",
+          "expiresAt": "2026-09-12T09:11:00.000Z",
+          "lastUsedAt": "2026-08-13T09:11:00.412Z"
+        }
+      ]
+    },
+    {
+      "name": "TestUser_1786612323329",
+      "email": "testuser_1786612323329@example.test",
+      "preferredLocation": "",
+      "passwordHash": "$2b$12$QLtdtBdBavQiMwmMu7QEpO31oequpbAiV5il0d7ioG2fFwxXBZW3q",
+      "role": "user",
+      "_id": "1786612324287",
+      "createdAt": "2026-08-13T09:12:04.287Z",
+      "updatedAt": "2026-08-13T09:12:04.299Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "5a5a2b180a9e76e56c710a882981a7f9387d8a3bd1768fc9",
+          "tokenHash": "b998111204d9d96e472c1b83ee56df0bd853ce8a641a78ed2a33ad5f35d8a9b1",
+          "role": "user",
+          "expiresAt": "2026-09-12T09:12:04.000Z",
+          "lastUsedAt": "2026-08-13T09:12:04.299Z"
+        }
+      ]
+    },
+    {
+      "name": "Yao",
+      "email": "bigadamsvince@gmail.com",
+      "preferredLocation": "Marcory ",
+      "passwordHash": "$2b$12$Vt7bqURR.1.FL2rle3k5d.7nI.DNooRmzm6DpJh8YHRpBfKkJ4hEi",
+      "role": "user",
+      "_id": "1786616213141",
+      "createdAt": "2026-08-13T10:16:53.141Z",
+      "updatedAt": "2026-08-13T10:16:53.151Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "fbed5a654dc1f4eceb22465b126dd0fba9564a6364f0e81d",
+          "tokenHash": "3d0277ec74c276cd8967cfa0a067a21f98eaf54c7a6723fe8a3112f77ab5b78e",
+          "role": "user",
+          "expiresAt": "2026-09-12T10:16:53.000Z",
+          "lastUsedAt": "2026-08-13T10:16:53.151Z"
+        }
+      ]
+    },
+    {
+      "email": "mariieassata26@gmail.com",
+      "passwordHash": "$2b$12$sY.mV93Ni9E38K1ZGRD2A.Bun.rjFzQ6sxUPLWScItcwZH0I0vi8u",
+      "role": "admin",
+      "_id": "1786715466413",
+      "createdAt": "2026-08-14T13:51:06.413Z",
+      "updatedAt": "2026-08-14T13:56:41.460Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "e10e6a3a5e2e272f0dfad17456c1d7e42515a0b5ce10939a",
+          "tokenHash": "e293675f8f7da8315093937dd844b2c29f6ee236d315f2df8da912d1c6576b24",
+          "role": "admin",
+          "expiresAt": "2026-09-13T13:56:41.000Z",
+          "lastUsedAt": "2026-08-14T13:56:41.459Z"
+        }
+      ]
+    },
+    {
+      "name": "TestUser_1786715798982",
+      "email": "testuser_1786715798982@example.test",
+      "preferredLocation": "",
+      "passwordHash": "$2b$12$Fq4pMci0YMyuqtM47IlSGeMc01577DheHJbumjdA2iHfLrBQc2yHG",
+      "role": "user",
+      "_id": "1786715800336",
+      "createdAt": "2026-08-14T13:56:40.336Z",
+      "updatedAt": "2026-08-14T13:56:40.347Z",
+      "__mockStoreKey": "users",
+      "refreshSessions": [
+        {
+          "sid": "9a043b8cb85c5ae2faad60f001bab63c394325e18580cb54",
+          "tokenHash": "f6c123b094abbe487010ac4b2d4313293823febb7712f28f0091b7fdae60cfca",
+          "role": "user",
+          "expiresAt": "2026-09-13T13:56:40.000Z",
+          "lastUsedAt": "2026-08-14T13:56:40.346Z"
+        }
+      ]
+    }
+  ],
+  "products": [
+    {
+      "name": "Abaya Nour",
+      "description": "Abaya deux pièces marine et robe bleu ciel. Tissu fluide premium, coupe élancée avec voile assorti.",
+      "price": 22000,
+      "categorySlug": "kimonos",
+      "inventory": 12,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.9,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "swatches": [
+        {
+          "name": "Bleu Marine",
+          "color": "#1a2d5c"
+        },
+        {
+          "name": "Noir",
+          "color": "#1a1a1a"
+        }
+      ],
+      "_id": "1786610396005",
+      "createdAt": "2026-08-13T08:39:56.005Z",
+      "updatedAt": "2026-08-14T13:55:55.815Z",
+      "__mockStoreKey": "products"
+    },
+    {
+      "name": "Robe Safa",
+      "description": "Robe longue avec manches évasées à volants papillon. Silhouette sculptante, tissu extensible confortable.",
+      "price": 19000,
+      "categorySlug": "robes",
+      "inventory": 18,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.8,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "swatches": [
+        {
+          "name": "Marron",
+          "color": "#6b3a1f"
+        },
+        {
+          "name": "Noir",
+          "color": "#1a1a1a"
+        }
+      ],
+      "_id": "1786610396006",
+      "createdAt": "2026-08-13T08:39:56.006Z",
+      "updatedAt": "2026-08-14T13:55:55.815Z",
+      "__mockStoreKey": "products"
+    },
+    {
+      "name": "Kimono Haya",
+      "description": "Kimono abaya camel avec drapé central élégant. Style épuré aux manches longues, ceinture assortie incluse.",
+      "price": 20000,
+      "categorySlug": "kimonos",
+      "inventory": 14,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.7,
+      "sizes": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "swatches": [
+        {
+          "name": "Camel",
+          "color": "#c49a6c"
+        },
+        {
+          "name": "Beige",
+          "color": "#d4b896"
+        }
+      ],
+      "_id": "1786610396007",
+      "createdAt": "2026-08-13T08:39:56.007Z",
+      "updatedAt": "2026-08-14T13:55:55.817Z",
+      "__mockStoreKey": "products"
+    },
+    {
+      "name": "Boubou Omar",
+      "description": "Grand boubou bleu marine avec broderies géométriques traditionnelles. Tissu de qualité supérieure, coupe ample royale.",
+      "price": 28000,
+      "categorySlug": "boubou",
+      "inventory": 10,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.9,
+      "sizes": [
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "swatches": [
+        {
+          "name": "Bleu Marine",
+          "color": "#1a2d5c"
+        },
+        {
+          "name": "Bordeaux",
+          "color": "#7a1a2e"
+        }
+      ],
+      "_id": "1786610396008",
+      "createdAt": "2026-08-13T08:39:56.008Z",
+      "updatedAt": "2026-08-14T13:55:55.818Z",
+      "__mockStoreKey": "products"
+    },
+    {
+      "name": "Qamis Bilal",
+      "description": "Qamis blanc avec broderies dorées artisanales sur le plastron. Finitions haut de gamme, parfait pour la prière et les occasions.",
+      "price": 25000,
+      "categorySlug": "boubou",
+      "inventory": 16,
+      "isVisible": true,
+      "isOutOfStock": false,
+      "images": [],
+      "featured": true,
+      "rating": 4.8,
+      "sizes": [
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "swatches": [
+        {
+          "name": "Blanc",
+          "color": "#f8f6ef"
+        },
+        {
+          "name": "Crème",
+          "color": "#f0ead0"
+        }
+      ],
+      "_id": "1786610396009",
+      "createdAt": "2026-08-13T08:39:56.009Z",
+      "updatedAt": "2026-08-14T13:55:55.818Z",
+      "__mockStoreKey": "products"
+    }
+  ],
+  "categories": [
+    {
+      "slug": "kimonos",
+      "name": "Abayas & Kimonos",
+      "description": "Abayas et kimonos modestes pour femme",
+      "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=800&q=80",
+      "_id": "1786610396000",
+      "createdAt": "2026-08-13T08:39:56.000Z",
+      "updatedAt": "2026-08-14T13:55:55.808Z",
+      "__mockStoreKey": "categories"
+    },
+    {
+      "slug": "robes",
+      "name": "Robes Longues",
+      "description": "Robes longues élégantes pour toutes occasions",
+      "image": "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=800&q=80",
+      "_id": "1786610396001",
+      "createdAt": "2026-08-13T08:39:56.001Z",
+      "updatedAt": "2026-08-14T13:55:55.811Z",
+      "__mockStoreKey": "categories"
+    },
+    {
+      "slug": "boubou",
+      "name": "Boubous & Qamis",
+      "description": "Tenues traditionnelles raffinées pour homme",
+      "image": "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=800&q=80",
+      "_id": "1786610396002",
+      "createdAt": "2026-08-13T08:39:56.002Z",
+      "updatedAt": "2026-08-14T13:55:55.812Z",
+      "__mockStoreKey": "categories"
+    }
+  ],
+  "banners": [
+    {
+      "title": "Nouvelles pièces modestes",
+      "subtitle": "Couleurs douces, coupes raffinées et détails artisanaux",
+      "image": "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80",
+      "cta": {
+        "text": "Voir la collection",
+        "link": "/shop"
+      },
+      "active": true,
+      "order": 2,
+      "_id": "1786610396003",
+      "createdAt": "2026-08-13T08:39:56.003Z",
+      "updatedAt": "2026-08-14T13:55:55.814Z",
+      "__mockStoreKey": "banners"
+    },
+    {
+      "title": "Collection Noor Al Hayaa",
+      "subtitle": "Une sélection élégante pour chaque occasion",
+      "image": "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1200&q=80",
+      "cta": {
+        "text": "Découvrir",
+        "link": "/shop"
+      },
+      "active": true,
+      "order": 1,
+      "_id": "1786612293668",
+      "createdAt": "2026-08-13T09:11:33.668Z",
+      "updatedAt": "2026-08-14T13:55:55.813Z",
+      "__mockStoreKey": "banners"
+    }
+  ],
+  "carts": {
+    "947dbf42-6e7c-434f-b821-b3379f4ec0ef": {
+      "sessionId": "947dbf42-6e7c-434f-b821-b3379f4ec0ef",
+      "items": [],
+      "total": 0,
+      "_id": "1786610950142",
+      "createdAt": "2026-08-13T08:49:10.142Z",
+      "updatedAt": "2026-08-13T08:49:10.142Z",
+      "__mockStoreKey": "carts"
+    },
+    "70289df6-0ef7-42e0-bb4e-d8eebea6fe13": {
+      "sessionId": "70289df6-0ef7-42e0-bb4e-d8eebea6fe13",
+      "items": [],
+      "total": 0,
+      "_id": "1786612754294",
+      "createdAt": "2026-08-13T09:19:14.294Z",
+      "updatedAt": "2026-08-13T09:19:14.294Z",
+      "__mockStoreKey": "carts"
+    },
+    "eb21e2ec-0a7a-419a-bbf6-e6892287733d": {
+      "sessionId": "eb21e2ec-0a7a-419a-bbf6-e6892287733d",
+      "items": [
+        {
+          "productId": "1786610396007",
+          "name": "Kimono Haya",
+          "price": 20000,
+          "size": "S",
+          "quantity": 1
+        },
+        {
+          "productId": "1786610396006",
+          "name": "Robe Safa",
+          "price": 19000,
+          "size": "S",
+          "quantity": 1
+        },
+        {
+          "productId": "1786610396005",
+          "name": "Abaya Nour",
+          "price": 22000,
+          "size": "S",
+          "quantity": 1
+        }
+      ],
+      "total": 61000,
+      "_id": "1786612777673",
+      "createdAt": "2026-08-13T09:19:37.673Z",
+      "updatedAt": "2026-08-13T09:19:37.673Z",
+      "__mockStoreKey": "carts"
+    }
+  },
+  "wishlists": {
+    "947dbf42-6e7c-434f-b821-b3379f4ec0ef": {
+      "sessionId": "947dbf42-6e7c-434f-b821-b3379f4ec0ef",
+      "items": [],
+      "_id": "1786610950666",
+      "createdAt": "2026-08-13T08:49:10.666Z",
+      "updatedAt": "2026-08-13T08:49:10.666Z",
+      "__mockStoreKey": "wishlists"
+    },
+    "70289df6-0ef7-42e0-bb4e-d8eebea6fe13": {
+      "sessionId": "70289df6-0ef7-42e0-bb4e-d8eebea6fe13",
+      "items": [],
+      "_id": "1786612754279",
+      "createdAt": "2026-08-13T09:19:14.279Z",
+      "updatedAt": "2026-08-13T09:19:14.279Z",
+      "__mockStoreKey": "wishlists"
+    },
+    "eb21e2ec-0a7a-419a-bbf6-e6892287733d": {
+      "sessionId": "eb21e2ec-0a7a-419a-bbf6-e6892287733d",
+      "items": [],
+      "_id": "1786612777803",
+      "createdAt": "2026-08-13T09:19:37.803Z",
+      "updatedAt": "2026-08-13T09:19:37.803Z",
+      "__mockStoreKey": "wishlists"
+    }
+  },
+  "orders": []
+}
