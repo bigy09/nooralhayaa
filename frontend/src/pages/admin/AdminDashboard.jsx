@@ -18,7 +18,7 @@ import { useAuth } from '../../context/AuthContext'
 
 const STATUS_CONFIG = {
   pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  confirmed: { label: 'Confirmée', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
+  confirmed: { label: 'En cours', color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
   shipped: { label: 'Expédiée', color: 'bg-purple-100 text-purple-800', icon: Package },
   delivered: { label: 'Livrée', color: 'bg-green-100 text-green-800', icon: CheckCircle },
   cancelled: { label: 'Annulée', color: 'bg-red-100 text-red-800', icon: AlertCircle },
@@ -26,7 +26,7 @@ const STATUS_CONFIG = {
 
 const ORDER_FILTERS = [
   { key: '', label: 'Tous' },
-  { key: 'pending', label: 'En attente' },
+  { key: 'pending', label: 'À valider' },
   { key: 'inProgress', label: 'En cours' },
   { key: 'delivered', label: 'Livrée' },
   { key: 'cancelled', label: 'Annulée' },
@@ -432,13 +432,31 @@ export default function AdminDashboard() {
                     <div key={order._id}>
                       <h3 className="text-lg font-semibold text-[#8C6239] mb-4">Details de {order.orderNumber}</h3>
                       <div className="mb-4 text-sm text-[#8C6239]">Paiement: <strong>{PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod}</strong></div>
+
+                      {order.status === 'pending' && (
+                        <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                          Paiement attendu : la commande doit être confirmée après réception du paiement du client.
+                        </div>
+                      )}
+
                       <select value={order.status} onChange={(e) => updateOrderStatus(order._id, e.target.value)} className="w-full px-4 py-2 rounded-lg border border-[#C5A059]/25 bg-white text-sm text-[#8C6239] focus:outline-none focus:border-[#C5A059]">
                         <option value="pending">En attente</option>
-                        <option value="confirmed">Confirmee</option>
+                        <option value="confirmed">En cours</option>
                         <option value="shipped">Expediee</option>
                         <option value="delivered">Livree</option>
                         <option value="cancelled">Annulee</option>
                       </select>
+
+                      {order.status === 'pending' && (
+                        <button
+                          type="button"
+                          onClick={() => updateOrderStatus(order._id, 'confirmed')}
+                          className="mt-4 w-full rounded-lg bg-[#8C6239] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#C5A059] transition-colors"
+                        >
+                          Confirmer le paiement
+                        </button>
+                      )}
+
                           <div className="mt-4 flex gap-3">
                             {order.customer?.phone ? (
                               <a

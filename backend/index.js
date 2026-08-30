@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import fs from 'fs';
 import multer from 'multer';
+import { upload, uploadDir } from './uploads.js';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
@@ -35,10 +36,10 @@ const PAYMENT_MINIMUM = Number(process.env.PAYMENT_MINIMUM || 2020);
 const CONTACT_WHATSAPP = process.env.WHATSAPP_PHONE || process.env.MERCHANT_PHONE || '2250702396063';
 const INFOLINE_PHONE = process.env.INFOLINE_PHONE || CONTACT_WHATSAPP;
 const PAYMENT_NUMBERS = {
-  wave: process.env.WAVE_PHONE || process.env.WAVE_MERCHANT_PHONE || '2250702396063',
-  orange: process.env.ORANGE_PHONE || process.env.ORANGE_MERCHANT_PHONE || '2250702396063',
-  moov: process.env.MOOV_PHONE || process.env.MOOV_MERCHANT_PHONE || '2250702396063',
-  mtn: process.env.MTN_PHONE || process.env.MTN_MERCHANT_PHONE || '2250702396063',
+  wave: process.env.WAVE_PHONE || process.env.WAVE_MERCHANT_PHONE || '0500838940',
+  orange: process.env.ORANGE_PHONE || process.env.ORANGE_MERCHANT_PHONE || '0716557419',
+  moov: process.env.MOOV_PHONE || process.env.MOOV_MERCHANT_PHONE || '0161136379',
+  mtn: process.env.MTN_PHONE || process.env.MTN_MERCHANT_PHONE || '0500838940',
 };
 const serverDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(serverDirectory, '..');
@@ -70,7 +71,13 @@ app.use(
         // En dev, Vite change de port automatiquement si le port par défaut est déjà
         // pris (5173 -> 5174 -> ...). Plutôt que de casser silencieusement toutes les
         // requêtes API à chaque décalage de port, on autorise tout localhost en dev.
-        if (!isProduction && (url.hostname === 'localhost' || url.hostname === '127.0.0.1')) {
+        if (
+          !isProduction && (
+            url.hostname === 'localhost' ||
+            url.hostname === '127.0.0.1' ||
+            url.hostname === '0.0.0.0'
+          )
+        ) {
           return callback(null, true);
         }
       } catch (_error) {
@@ -81,26 +88,6 @@ app.use(
   })
 );
 app.use(express.json({ limit: '1mb' }));
-
-const uploadDir = path.join(projectRoot, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, uploadDir),
-    filename: (_req, file, cb) => {
-      const safeName = `${Date.now()}-${file.originalname.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-.]/g, '')}`;
-      cb(null, safeName);
-    },
-  }),
-  fileFilter: (_req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-    cb(null, allowedTypes.includes(file.mimetype));
-  },
-  limits: { fileSize: 5 * 1024 * 1024 },
-});
 
 app.use('/uploads', express.static(uploadDir));
 

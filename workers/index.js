@@ -1,3 +1,60 @@
+import { getFromR2, uploadToR2 } from './r2-helper.js';
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    // Health check
+    if (url.pathname === '/health') {
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Upload endpoint: POST raw body to R2. Frontend should send the file bytes
+    // with header `x-filename` set to the desired key.
+    if (url.pathname === '/api/uploads' && request.method === 'POST') {
+      const filename = request.headers.get('x-filename') || `upload-${Date.now()}`;
+      const contentType = request.headers.get('content-type') || 'application/octet-stream';
+      const buffer = await request.arrayBuffer();
+      await uploadToR2(env.UPLOADS, filename, buffer, contentType);
+      const publicUrl = `${new URL(request.url).origin}/uploads/${filename}`;
+      return new Response(JSON.stringify({ ok: true, url: publicUrl }), { status: 201, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // Serve uploads from R2 if path matches
+    if (url.pathname.startsWith('/uploads/')) {
+      const key = url.pathname.replace(/^\/uploads\//, '');
+      const resp = await getFromR2(env.UPLOADS, key);
+      if (!resp) return new Response('Not found', { status: 404 });
+      return resp;
+    }
+
+    // Proxy API requests to a backend service (or handle in-worker)
+    if (url.pathname.startsWith('/api')) {
+      const backend = env.BACKEND_URL || '';
+      if (!backend) {
+        return new Response(JSON.stringify({ error: 'BACKEND_URL not configured' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      }
+
+      const backendUrl = new URL(backend);
+      backendUrl.pathname = url.pathname;
+      backendUrl.search = url.search;
+
+      // Forward headers but remove host to avoid CORS issues
+      const headers = new Headers(request.headers);
+      headers.set('x-forwarded-host', request.headers.get('host') || '');
+
+      const upstreamResponse = await fetch(backendUrl.toString(), {
+        method: request.method,
+        headers,
+        body: request.body
+      });
+      return upstreamResponse;
+    }
+
+    // Default placeholder
+    return new Response('App Assata Worker scaffold — nothing to serve here.', { status: 200 });
+  }
+}
 // Worker scaffold — minimal example using Cloudflare Workers
 import data from './data.json' assert { type: 'json' }
 import { SignJWT, jwtVerify } from 'jose'

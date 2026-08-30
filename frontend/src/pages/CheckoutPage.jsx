@@ -207,7 +207,8 @@ export default function CheckoutPage() {
       setOrder(data)
 
       const methodNumber = (paymentConfig.paymentNumbers || {})[method] || getPaymentMethodDetails(method).number
-      const paymentLink = generateMobileMoneyLink(method, methodNumber)
+      const amountToPay = Number(data?.paymentAmount ?? data?.paymentDetails?.paymentAmount ?? paymentDetails?.paymentAmount ?? orderTotalWithDelivery)
+      const paymentLink = generateMobileMoneyLink(method, methodNumber, amountToPay)
       if (paymentLink) globalThis.open(paymentLink, '_blank')
 
       clear()
@@ -390,6 +391,34 @@ export default function CheckoutPage() {
                       )}
                     </p>
                   )}
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-[#C5A059]/15 bg-[#fffaf5] p-4">
+                  <p className="text-sm font-semibold text-[#8C6239]">Compte {getPaymentMethodDetails(method, { number: paymentConfig.paymentNumbers?.[method] || undefined, amount: paymentDetails?.paymentAmount || orderTotalWithDelivery }).label}</p>
+                  <p className="mt-2 text-sm text-[#8C6239]/80">{paymentConfig.paymentNumbers?.[method] || getPaymentMethodDetails(method).number}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <a
+                      href={getPaymentMethodDetails(method, { number: paymentConfig.paymentNumbers?.[method] || undefined, amount: paymentDetails?.paymentAmount || orderTotalWithDelivery }).transferLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full bg-[#8C6239] px-3 py-1.5 text-xs font-semibold text-white"
+                    >
+                      Envoyer le paiement
+                    </a>
+                    <a
+                      href={getPaymentMethodDetails(method, { number: paymentConfig.paymentNumbers?.[method] || undefined, amount: paymentDetails?.paymentAmount || orderTotalWithDelivery }).callLink}
+                      className="rounded-full border border-[#C5A059]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#8C6239]"
+                    >
+                      Appeler
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard?.writeText(paymentConfig.paymentNumbers?.[method] || getPaymentMethodDetails(method).number)}
+                      className="rounded-full border border-[#C5A059]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#8C6239]"
+                    >
+                      Copier
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => setStep(1)} className="flex-1 rounded-full border border-[#C5A059]/25 bg-white px-4 py-3 text-sm font-medium text-[#8C6239] hover:bg-[#F9EAE1] transition-colors">

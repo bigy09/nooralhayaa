@@ -1,0 +1,9 @@
+name = "app-assata-worker"
+main = "workers/index.js"
+compatibility_date = "2026-08-26"
+account_id = "YOUR_ACCOUNT_ID"
+type = "javascript"
+
+[[r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "app-assata-uploads"

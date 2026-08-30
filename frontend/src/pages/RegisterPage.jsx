@@ -29,7 +29,10 @@ export default function RegisterPage() {
       await register({ name, email, password, preferredLocation })
       navigate(nextPath, { replace: true })
     } catch (err) {
-      setError(err.message)
+      const message = err?.message === 'Failed to fetch'
+        ? 'Impossible de joindre le serveur. Vérifie que le backend est bien démarré et accessible.'
+        : err?.message || 'Une erreur est survenue lors de l’inscription.'
+      setError(message)
     } finally {
       setLoading(false)
     }
