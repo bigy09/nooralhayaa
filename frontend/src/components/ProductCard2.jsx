@@ -4,6 +4,7 @@ import { Star, ShoppingBag, Heart } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { formatPrice } from '../utils/payment'
+import { getProductVisual } from '../utils/productVisuals'
 
 function Stars({ rating }) {
   return (
@@ -23,6 +24,7 @@ function Stars({ rating }) {
 export default function ProductCard2({ product, index = 0 }) {
   const { add } = useCart()
   const { toggle, isLiked } = useWishlist()
+  const imageSrc = product.image || product.images?.[0] || getProductVisual(product).image
 
   function quickAdd(e) {
     e.preventDefault()
@@ -38,16 +40,23 @@ export default function ProductCard2({ product, index = 0 }) {
     >
       <Link to={`/product/${product.id}`} className="group block">
         <div className="relative rounded-2xl overflow-hidden bg-gray-50 aspect-[3/4] sm:aspect-[4/5]">
-          {/* Swatch visual (placeholder for real image) */}
-          <div className="absolute inset-0 flex">
-            {(product.swatches || []).map((swatch, i) => (
-              <div
-                key={i}
-                className="flex-1 h-full transition-transform duration-500 group-hover:scale-110"
-                style={{ backgroundColor: (swatch && (swatch.color || swatch)) || 'transparent' }}
-              />
-            ))}
-          </div>
+          {imageSrc ? (
+            <img
+              src={imageSrc}
+              alt={product.name}
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="absolute inset-0 flex">
+              {(product.swatches || []).map((swatch, i) => (
+                <div
+                  key={i}
+                  className="flex-1 h-full transition-transform duration-500 group-hover:scale-110"
+                  style={{ backgroundColor: (swatch && (swatch.color || swatch)) || 'transparent' }}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Overlay on hover */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />

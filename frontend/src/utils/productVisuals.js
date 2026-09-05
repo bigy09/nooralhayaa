@@ -1,79 +1,66 @@
-import femme1 from '../assets/abaya-nour.jpg'
-import femme2 from '../assets/robe-safa.jpg'
-import femme3 from '../assets/kimono-haya.jpg'
-import femme4 from '../assets/robe-rahma.jpg'
-import femme5 from '../assets/ensemble-samira.jpg'
-import homme1 from '../assets/boubou-omar.jpg'
-import homme2 from '../assets/qamis-bilal.jpg'
-import homme3 from '../assets/boubou-nabil.jpg'
-import homme4 from '../assets/grand-boubou-youssef.jpg'
+import nourah1 from '../assets/robe nourah.jpg'
+import nourah2 from '../assets/robe nourah 2.jpg'
+import nadira1 from '../assets/robe nadira.jpg'
+import nadira2 from '../assets/robe-nadira.jpg'
+import meetah1 from '../assets/tunique meetah.jpg'
+import meetah2 from '../assets/tunique meetah (2).jpg'
+import meetah3 from '../assets/tunique  meetah.jpg'
+import anta1 from '../assets/Boubou anta.jpg'
+import anta2 from '../assets/boubou anta (2).jpg'
+import fatim from '../assets/abaya fatim.jpg'
+import aicha from '../assets/boubou aicha.jpg'
+import roky from '../assets/boubou roky.jpg'
+import mouna from '../assets/abaya mouna.jpg'
+import makila1 from '../assets/ensemble makila.jpg'
+import makila2 from '../assets/Ensemble makila (2).jpg'
 
-const visualsByName = {
-  // ── Femme ──────────────────────────────────────────────────────────────────
-  'Abaya Nour': {
-    image: femme1,
-    background: 'linear-gradient(180deg, #dce6f5 0%, #b7c9e8 100%)',
-  },
-  'Robe Safa': {
-    image: femme2,
-    background: 'linear-gradient(180deg, #f4e0d0 0%, #c88a5a 100%)',
-  },
-  'Kimono Haya': {
-    image: femme3,
-    background: 'linear-gradient(180deg, #f5ede1 0%, #c49a6c 100%)',
-  },
-  'Robe Rahma': {
-    image: femme4,
-    background: 'linear-gradient(180deg, #f5e8d8 0%, #c0854d 100%)',
-  },
-  'Ensemble Samira': {
-    image: femme5,
-    background: 'linear-gradient(180deg, #e8e8e8 0%, #9ca3af 100%)',
-  },
-
-  // ── Homme ──────────────────────────────────────────────────────────────────
-  'Boubou Omar': {
-    image: homme1,
-    background: 'linear-gradient(180deg, #dce4f0 0%, #3b4e72 100%)',
-  },
-  'Qamis Bilal': {
-    image: homme2,
-    background: 'linear-gradient(180deg, #f8f6ef 0%, #c8b96a 100%)',
-  },
-  'Boubou Nabil': {
-    image: homme3,
-    background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
-  },
-  'Grand Boubou Youssef': {
-    image: homme4,
-    background: 'linear-gradient(180deg, #1e2d4a 0%, #0d1a2e 100%)',
-  },
+const visualsById = {
+  f1: nourah1,
+  f2: nourah2,
+  f3: nadira1,
+  f4: nadira2,
+  f5: meetah1,
+  f6: meetah2,
+  f7: meetah3,
+  f8: anta1,
+  f9: anta2,
+  f10: fatim,
+  f11: aicha,
+  f12: roky,
+  f13: mouna,
+  f14: makila1,
+  f15: makila2,
 }
+
+const defaultBackground = 'linear-gradient(180deg, #f5ede1 0%, #c49a6c 100%)'
 
 const fallbackByCategory = {
   kimonos: {
-    image: femme3,
-    background: 'linear-gradient(180deg, #f5ede1 0%, #c49a6c 100%)',
+    image: mouna,
+    background: defaultBackground,
   },
   abaya: {
-    image: femme1,
-    background: 'linear-gradient(180deg, #dce6f5 0%, #b7c9e8 100%)',
+    image: fatim,
+    background: defaultBackground,
   },
   robes: {
-    image: femme2,
-    background: 'linear-gradient(180deg, #f4e0d0 0%, #c88a5a 100%)',
+    image: nourah1,
+    background: defaultBackground,
   },
   boubou: {
-    image: homme1,
-    background: 'linear-gradient(180deg, #dce4f0 0%, #3b4e72 100%)',
+    image: anta1,
+    background: defaultBackground,
   },
   qamis: {
-    image: homme2,
-    background: 'linear-gradient(180deg, #f8f6ef 0%, #c8b96a 100%)',
+    image: anta1,
+    background: defaultBackground,
   },
 }
 
 export function getProductVisual(product) {
   if (!product) return fallbackByCategory.robes
-  return visualsByName[product.name] || fallbackByCategory[product.categorySlug] || fallbackByCategory.robes
+  const image = visualsById[product.id]
+  return image
+    ? { image, background: defaultBackground }
+    : fallbackByCategory[product.categorySlug] || fallbackByCategory.robes
 }
