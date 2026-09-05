@@ -17,10 +17,12 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install --prefix frontend --no-audit --no-fund
+        working-directory: frontend
+        run: npm install --no-audit --no-fund --workspaces=false
 
       - name: Build frontend
-        run: npm run build --prefix frontend
+        working-directory: frontend
+        run: npm run build
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
