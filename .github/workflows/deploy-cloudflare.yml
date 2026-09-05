@@ -18,7 +18,7 @@ jobs:
           node-version: 18
 
       - name: Install dependencies (root)
-        run: npm ci
+        run: npm install --prefix frontend --no-audit --no-fund
 
       - name: Build frontend
         run: npm run build --prefix frontend
