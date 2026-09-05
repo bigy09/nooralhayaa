@@ -32,6 +32,18 @@ const visualsById = {
   f15: makila2,
 }
 
+const visualsByName = {
+  'Robe Nourah': nourah1,
+  'Robe Nadira': nadira1,
+  'Tunique Meetah': meetah1,
+  'Boubou Anta': anta1,
+  'Abaya Fatim': fatim,
+  'Boubou Aïcha': aicha,
+  'Boubou Roky': roky,
+  'Abaya Mouna': mouna,
+  'Ensemble Makila': makila1,
+}
+
 const defaultBackground = 'linear-gradient(180deg, #f5ede1 0%, #c49a6c 100%)'
 
 const fallbackByCategory = {
@@ -59,7 +71,7 @@ const fallbackByCategory = {
 
 export function getProductVisual(product) {
   if (!product) return fallbackByCategory.robes
-  const image = visualsById[product.id]
+  const image = visualsById[product.id] || visualsByName[product.name?.trim()]
   return image
     ? { image, background: defaultBackground }
     : fallbackByCategory[product.categorySlug] || fallbackByCategory.robes

@@ -10,6 +10,23 @@ function normalizeProduct(product) {
   }
 }
 
+function isCurrentLocalCatalogProduct(product) {
+  return LOCAL_PRODUCTS.some((localProduct) => localProduct.name === product.name)
+}
+
+function filterLocalProducts(params, blockedCategorySlugs) {
+  let filtered = LOCAL_PRODUCTS
+  if (params.category) filtered = filtered.filter((product) => product.categorySlug === params.category)
+  if (params.featured === 'true') filtered = filtered.filter((product) => product.featured)
+  if (params.search) {
+    const search = params.search.toLowerCase()
+    filtered = filtered.filter((product) => (
+      product.name.toLowerCase().includes(search) || product.description.toLowerCase().includes(search)
+    ))
+  }
+  return filtered.filter((product) => !blockedCategorySlugs.includes(product.categorySlug)).map(normalizeProduct)
+}
+
 // Retombe sur le catalogue statique local si l'API est indisponible, mais ne le
 // fait plus silencieusement : on logue l'erreur et on expose un flag `error` pour
 // que l'UI puisse, si elle le souhaite, avertir que les données affichées peuvent
@@ -36,36 +53,20 @@ export function useProducts(params = {}) {
       .then(r => r.json())
         .then(data => {
         if (Array.isArray(data)) {
-          setProducts(data.map(normalizeProduct).filter(p => !BLOCKED_CATEGORY_SLUGS.includes(p.categorySlug)))
+          const apiProducts = data.map(normalizeProduct).filter(p => !BLOCKED_CATEGORY_SLUGS.includes(p.categorySlug))
+          const hasCurrentCatalog = apiProducts.some(isCurrentLocalCatalogProduct)
+          setProducts(hasCurrentCatalog ? apiProducts : filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
         } else {
           logFallback('GET /api/products (unexpected response shape)', data)
           setError('api-unavailable')
-          let filtered = LOCAL_PRODUCTS
-          if (params.category) filtered = filtered.filter(p => p.categorySlug === params.category)
-          if (params.featured === 'true') filtered = filtered.filter(p => p.featured)
-          if (params.search) {
-            const s = params.search.toLowerCase()
-            filtered = filtered.filter(p => p.name.toLowerCase().includes(s) || p.description.toLowerCase().includes(s))
-          }
-          // remove blocked (homme) products from local fallback
-          filtered = filtered.filter(p => !BLOCKED_CATEGORY_SLUGS.includes(p.categorySlug))
-          setProducts(filtered.map(normalizeProduct))
+          setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
         }
         setLoading(false)
       })
       .catch((err) => {
         logFallback('GET /api/products', err)
         setError('api-unavailable')
-        let filtered = LOCAL_PRODUCTS
-        if (params.category) filtered = filtered.filter(p => p.categorySlug === params.category)
-        if (params.featured === 'true') filtered = filtered.filter(p => p.featured)
-        if (params.search) {
-          const s = params.search.toLowerCase()
-          filtered = filtered.filter(p => p.name.toLowerCase().includes(s) || p.description.toLowerCase().includes(s))
-        }
-        // remove blocked (homme) products from local fallback
-        filtered = filtered.filter(p => !BLOCKED_CATEGORY_SLUGS.includes(p.categorySlug))
-        setProducts(filtered.map(normalizeProduct))
+        setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
         setLoading(false)
       })
   }, [JSON.stringify(params)])
