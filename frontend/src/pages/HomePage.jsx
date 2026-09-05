@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, ChevronLeft, ChevronRight, Heart, ShoppingBag, Sparkles } from 'lucide-react'
 import HeroCarousel from '../components/HeroCarousel'
 import { useProducts, useCategories, useBanners } from '../hooks/useApi'
+import { LOCAL_PRODUCTS } from '../data/products'
 import { formatPrice } from '../utils/payment'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
@@ -216,11 +217,17 @@ export default function HomePage() {
     return products.filter((product) => product.categorySlug === 'pantalons').slice(0, 6)
   }, [products])
 
-  const categoryCards = categories.map((category, index) => ({
-    ...category,
-    image: getProductVisual(products.find((product) => product.categorySlug === category.slug)).image,
-    accent: index % 2 === 0 ? BRAND.brown : BRAND.gold,
-  }))
+  const categoryCards = categories.map((category, index) => {
+    const categorySlug = category.slug === 'kimonos' ? 'abayas-kimonos' : category.slug
+    const categoryProduct = LOCAL_PRODUCTS.find((product) => product.categorySlug === categorySlug)
+      || products.find((product) => product.categorySlug === category.slug)
+
+    return {
+      ...category,
+      image: categoryProduct ? getProductVisual(categoryProduct).image : null,
+      accent: index % 2 === 0 ? BRAND.brown : BRAND.gold,
+    }
+  }).filter((category) => category.image)
 
   const womenHeroVisual = getProductVisual(womenProducts[0] || products[0])
   const menHeroVisual = getProductVisual(menProducts[0] || products[1])
