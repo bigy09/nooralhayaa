@@ -169,8 +169,9 @@ function createQueryableCollection(_items, storeKey) {
       }
     }
 
-    if (options.limit) {
-      docs = docs.slice(0, options.limit)
+    if (options.skip || options.limit) {
+      const start = options.skip || 0
+      docs = options.limit ? docs.slice(start, start + options.limit) : docs.slice(start)
     }
 
     if (options.select) {
@@ -190,10 +191,15 @@ function createQueryableCollection(_items, storeKey) {
     const chain = {
       _query: query,
       _sort: null,
+      _skip: 0,
       _limit: null,
       _select: null,
       sort(value) {
         chain._sort = value
+        return chain
+      },
+      skip(value) {
+        chain._skip = Math.max(0, Number(value) || 0)
         return chain
       },
       limit(value) {
@@ -219,6 +225,7 @@ function createQueryableCollection(_items, storeKey) {
       async exec() {
         const options = {}
         if (chain._sort) options.sort = chain._sort
+        if (chain._skip) options.skip = chain._skip
         if (chain._limit) options.limit = chain._limit
         if (chain._select) options.select = chain._select
         return buildResult(chain._query, options)
