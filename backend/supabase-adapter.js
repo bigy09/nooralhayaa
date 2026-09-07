@@ -37,7 +37,7 @@ const FIELD_MAP = {
 
 const REVERSE_FIELD_MAP = Object.fromEntries(Object.entries(FIELD_MAP).map(([key, value]) => [value, key]))
 
-function fromRow(row) {
+function fromRow(row, client, table) {
   if (!row) return row
   const result = {}
   for (const [key, value] of Object.entries(row)) {
@@ -46,7 +46,11 @@ function fromRow(row) {
   }
   result._id = result._id || row.id
   result.toObject = () => ({ ...result, toObject: undefined })
-  result.save = async () => result
+  result.save = async () => {
+    const { data, error } = await client.from(table).update(toRow(result)).eq('id', result._id).select('*').single()
+    if (error) throw error
+    return fromRow(data, client, table)
+  }
   return result
 }
 
@@ -58,6 +62,24 @@ function toRow(data) {
   }
   if (row.id === undefined) delete row.id
   return row
+}
+
+function applyUpdate(document, update) {
+  if (update.$set) Object.assign(document, update.$set)
+  if (update.$pull) {
+    for (const [key, query] of Object.entries(update.$pull)) {
+      if (!Array.isArray(document[key])) continue
+      document[key] = document[key].filter((item) => !Object.entries(query).every(([field, expected]) => String(item[field]) === String(expected)))
+    }
+  }
+  if (update.$push) {
+    for (const [key, value] of Object.entries(update.$push)) document[key] = [...(document[key] || []), value]
+  }
+  if (update.$inc) {
+    for (const [key, value] of Object.entries(update.$inc)) document[key] = (Number(document[key]) || 0) + value
+  }
+  for (const [key, value] of Object.entries(update)) if (!key.startsWith('$')) document[key] = value
+  return document
 }
 
 function nestedValue(record, path) {
@@ -95,7 +117,7 @@ function createQuery(client, table, query = {}) {
     async exec() {
       const { data, error } = await client.from(table).select('*')
       if (error) throw error
-      let rows = (data || []).map(fromRow).filter((row) => matches(row, query))
+      let rows = (data || []).map((row) => fromRow(row, client, table)).filter((row) => matches(row, query))
       if (state.sort) {
         const [field, direction] = Object.entries(state.sort)[0] || []
         const mapped = REVERSE_FIELD_MAP[field] || field
@@ -118,7 +140,7 @@ function createModel(client, table) {
     create: async (data) => {
       const { data: rows, error } = await client.from(table).insert(toRow(data)).select('*').single()
       if (error) throw error
-      return fromRow(rows)
+      return fromRow(rows, client, table)
     },
     updateOne: async (query, update, options = {}) => {
       const current = await (query._id ? createQuery(client, table, { id: query._id }) : createQuery(client, table, query)).limit(1)
@@ -126,24 +148,26 @@ function createModel(client, table) {
         if (update?.$upsert === false) return null
         return createModel(client, table).create({ ...query, ...(update.$set || update) })
       }
-      const patch = update.$set || update
-      const { data, error } = await client.from(table).update(toRow(patch)).eq('id', current[0]._id).select('*').single()
+      const document = applyUpdate({ ...current[0] }, update)
+      const { data, error } = await client.from(table).update(toRow(document)).eq('id', current[0]._id).select('*').single()
       if (error) throw error
-      return fromRow(data)
+      return fromRow(data, client, table)
     },
     findByIdAndUpdate: async (id, update) => {
-      const patch = update.$set || update
-      const { data, error } = await client.from(table).update(toRow(patch)).eq('id', id).select('*').single()
+      const current = await createQuery(client, table, { id }).limit(1)
+      if (!current[0]) return null
+      const document = applyUpdate({ ...current[0] }, update)
+      const { data, error } = await client.from(table).update(toRow(document)).eq('id', id).select('*').single()
       if (error) throw error
-      return fromRow(data)
+      return fromRow(data, client, table)
     },
     findOneAndUpdate: async (query, update) => {
       const current = await createQuery(client, table, query).limit(1)
       if (!current[0]) return null
-      const patch = update.$set || update
-      const { data, error } = await client.from(table).update(toRow(patch)).eq('id', current[0]._id).select('*').single()
+      const document = applyUpdate({ ...current[0] }, update)
+      const { data, error } = await client.from(table).update(toRow(document)).eq('id', current[0]._id).select('*').single()
       if (error) throw error
-      return fromRow(data)
+      return fromRow(data, client, table)
     },
     findByIdAndDelete: async (id) => {
       const current = await createQuery(client, table, { id }).limit(1)
