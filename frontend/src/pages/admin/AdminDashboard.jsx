@@ -41,7 +41,7 @@ const PAYMENT_LABELS = {
 
 const MENU = [
   { key: 'dashboard', label: 'Tableau de bord', icon: TrendingUp },
-  { key: 'orders', label: 'Ordres', icon: Package },
+  { key: 'orders', label: 'Commandes', icon: Package },
   { key: 'products', label: 'Produits', icon: BarChart3 },
   { key: 'clients', label: 'Clients', icon: Users },
   { key: 'analytics', label: 'Analytique', icon: BarChart3 },
@@ -161,6 +161,7 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
+    if (activeView === 'orders') loadOrders()
     if (activeView === 'products') loadProducts()
     if (activeView === 'clients') loadClients()
     if (activeView === 'analytics') loadAnalytics()
@@ -342,7 +343,7 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2">
                     {[
                       { key: 'sales', label: 'Ventes' },
-                      { key: 'orders', label: 'Ordres' },
+                      { key: 'orders', label: 'Commandes' },
                       { key: 'views', label: 'Vues' },
                     ].map((tab) => (
                       <button
@@ -360,7 +361,7 @@ export default function AdminDashboard() {
 
               <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-[#F9EAE1]">
-                  <h2 className="text-lg font-semibold text-[#8C6239]">Ordres recents</h2>
+                  <h2 className="text-lg font-semibold text-[#8C6239]">Commandes recentes</h2>
                 </div>
                 <ul className="divide-y divide-[#F9EAE1]">
                   {stats.recentOrders.map((order) => (
@@ -389,6 +390,13 @@ export default function AdminDashboard() {
                     {filter.label}
                   </button>
                 ))}
+                <button
+                  type="button"
+                  onClick={loadOrders}
+                  className="ml-auto rounded-full border border-[#C5A059]/25 bg-white px-3 py-1.5 text-xs text-[#8C6239] hover:bg-[#F9EAE1]"
+                >
+                  Actualiser
+                </button>
               </div>
 
               <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
