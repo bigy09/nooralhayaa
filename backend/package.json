@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "seed": "node seed.js",
+    "reset-users": "node scripts/reset-users.js",
     "start": "node index.js"
   },
   "dependencies": {
