@@ -13,7 +13,7 @@ const panels = [
   {
     key: 'details',
     title: "Details de l'article",
-    content: "Une piece pensee pour une allure elegante et actuelle. Le volume, le tissu et la coupe ont ete choisis pour offrir confort, presence et fluidite au quotidien comme lors des occasions speciales.",
+    content: 'Une pièce pensée pour une allure élégante et actuelle. Le volume, le tissu et la coupe offrent confort et fluidité au quotidien comme pour les occasions spéciales.',
   },
   {
     key: 'shipping',
@@ -130,7 +130,7 @@ export default function ProductPage() {
     return (
       <div className="px-4 pt-40 text-center text-[#8C6239]">
         <p>Produit introuvable.</p>
-        <Link to="/shop" className="mt-4 inline-block text-[#C5A059] underline">Retour a la boutique</Link>
+        <Link to="/shop" className="mt-4 inline-block text-[#C5A059] underline">Retour à la boutique</Link>
       </div>
     )
   }
@@ -138,7 +138,7 @@ export default function ProductPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 pt-32 pb-16">
       <Link to="/shop" className="inline-flex items-center gap-2 text-sm text-[#8C6239]/75 hover:text-[#C5A059] transition-colors mb-8">
-        <ArrowLeft size={15} /> Retour a la boutique
+        <ArrowLeft size={15} /> Retour à la boutique
       </Link>
 
       <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 xl:gap-10 items-start">

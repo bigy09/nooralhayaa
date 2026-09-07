@@ -13,7 +13,7 @@ export const LOCAL_PRODUCTS = [
     featured: true,
     rating: 4.9,
     reviews: 42,
-    description: 'Abaya deux pièces .',
+    description: 'Abaya deux pièces, coupe fluide et élégante.',
   },
   {
     id: 'f2',
@@ -97,7 +97,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Boubou fluide, léger et facile à assortir.',
   },
   {
     id: 'f9',
@@ -109,7 +109,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Boubou fluide, léger et facile à assortir.',
   },
   {
     id: 'f10',
@@ -121,7 +121,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Abaya fluide, légère et facile à assortir.',
   },
   {
     id: 'f11',
@@ -133,7 +133,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Boubou élégant, léger et confortable.',
   },
   {
     id: 'f12',
@@ -145,7 +145,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Boubou fluide, léger et facile à assortir.',
   },
    {
     id: 'f13',
@@ -157,7 +157,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Abaya fluide, légère et facile à assortir.',
   },
    {
     id: 'f14',
@@ -169,7 +169,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Ensemble fluide, élégant et confortable.',
   },
   {
     id: 'f15',
@@ -181,7 +181,7 @@ export const LOCAL_PRODUCTS = [
     featured: false,
     rating: 4.7,
     reviews: 15,
-    description: 'Voile léger et satiné, souple et facile à assortir pour toutes les tenues.',
+    description: 'Ensemble fluide, élégant et confortable.',
   },
 
 

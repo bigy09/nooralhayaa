@@ -81,8 +81,7 @@ export default function ShopPage() {
           <div className="grid gap-8 px-6 py-10 md:px-10 md:py-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
             <div>
               <p className="text-xs uppercase tracking-[0.35em] text-[#C5A059] font-semibold">Boutique</p>
-              <h1 className="mt-4 text-3xl md:text-5xl font-semibold text-[#8C6239] leading-tight">Selection de la boutique</h1>
-              <p className="mt-4 max-w-xl text-sm leading-relaxed text-[#8C6239]/72 md:text-base">Filtre rapidement, recherche et explore les articles visibles.</p>
+              <h1 className="mt-4 text-3xl md:text-5xl font-semibold text-[#8C6239] leading-tight">Sélection de la boutique</h1>
             </div>
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end">
                 <form onSubmit={handleSearch} className="relative w-full">
@@ -101,10 +100,10 @@ export default function ShopPage() {
                   onChange={(event) => setParam('sort', event.target.value)}
                   className="bg-transparent outline-none"
                 >
-                  <option value="featured">Selection maison</option>
+                  <option value="featured">Sélection maison</option>
                   <option value="price-asc">Prix croissant</option>
-                  <option value="price-desc">Prix decroissant</option>
-                  <option value="rating">Mieux notes</option>
+                  <option value="price-desc">Prix décroissant</option>
+                  <option value="rating">Mieux notés</option>
                 </select>
               </div>
             </div>
@@ -115,7 +114,7 @@ export default function ShopPage() {
       <section className="max-w-7xl mx-auto px-4 mt-6">
         {selectedCategory && (
           <div className="mb-4 rounded-3xl border border-[#C5A059]/20 bg-white px-5 py-4 text-sm text-[#8C6239] shadow-[0_12px_30px_rgba(140,98,57,0.08)]">
-            Filtre active : <span className="font-semibold">{selectedCategory.name}</span>
+            Filtre actif : <span className="font-semibold">{selectedCategory.name}</span>
           </div>
         )}
         <div className="mb-5 flex flex-wrap items-center gap-3">
@@ -130,7 +129,7 @@ export default function ShopPage() {
           <label className="flex min-w-36 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
             Genre
             <select value={genderFilter} onChange={(event) => setParam('gender', event.target.value)} className="rounded-full border border-[#C5A059]/25 bg-white px-3 py-2 text-sm font-normal outline-none">
-              <option value="">Femme et Homme</option>
+              <option value="">Femme et homme</option>
               <option value="femme">Femme</option>
               <option value="homme">Homme</option>
             </select>

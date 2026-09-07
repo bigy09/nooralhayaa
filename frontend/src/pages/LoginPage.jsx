@@ -84,7 +84,7 @@ export default function LoginPage() {
         <p className="mt-5 text-sm text-[#8C6239]/65">
           Pas encore de compte ?{' '}
           <Link to="/register" state={{ from: nextPath }} className="font-semibold text-[#C5A059] hover:text-[#8C6239]">
-            Creer un compte
+            Créer un compte
           </Link>
         </p>
       </div>

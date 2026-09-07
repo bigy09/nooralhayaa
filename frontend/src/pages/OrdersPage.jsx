@@ -143,7 +143,7 @@ export default function OrdersPage() {
     <div className="min-h-screen bg-[#F9EAE1] pt-32 pb-20">
       <div className="max-w-6xl mx-auto px-4">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-[#8C6239]/70 hover:text-[#C5A059] transition-colors mb-8">
-          <ArrowLeft size={15} /> Retour a l'accueil
+          <ArrowLeft size={15} /> Retour à l'accueil
         </Link>
 
         <div className="mb-8">
@@ -161,7 +161,7 @@ export default function OrdersPage() {
             <p className="mt-1 text-2xl font-semibold text-[#8C6239]">{stats.pending}</p>
           </div>
           <div className="rounded-2xl border border-[#C5A059]/15 bg-white px-4 py-3 shadow-[0_10px_25px_rgba(140,98,57,0.08)]">
-            <p className="text-xs uppercase tracking-[0.14em] text-[#8C6239]/55">Total depense</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-[#8C6239]/55">Total dépensé</p>
             <p className="mt-1 text-2xl font-semibold text-[#C5A059]">{formatPrice(stats.total)}</p>
           </div>
         </div>
@@ -171,10 +171,10 @@ export default function OrdersPage() {
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#F9EAE1]">
               <Package size={30} className="text-[#C5A059]" />
             </div>
-            <h2 className="text-xl font-semibold text-[#8C6239]">Aucune commande enregistree</h2>
-            <p className="mt-2 text-sm text-[#8C6239]/65">Tes commandes apparaitront ici des la premiere validation.</p>
+            <h2 className="text-xl font-semibold text-[#8C6239]">Aucune commande enregistrée</h2>
+            <p className="mt-2 text-sm text-[#8C6239]/65">Tes commandes apparaîtront ici après ta première validation.</p>
             <Link to="/shop" className="mt-7 inline-flex rounded-full bg-[#8C6239] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C5A059]">
-              Decouvrir la boutique
+              Découvrir la boutique
             </Link>
           </div>
         ) : (

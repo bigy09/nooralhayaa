@@ -23,7 +23,7 @@ export default function Navbar() {
   const previewRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const managerWhatsAppLink = buildWhatsAppLink('Bonjour Noor Al Hayaa, je souhaite des informations sur vos articles.')
+  const managerWhatsAppLink = buildWhatsAppLink()
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
@@ -337,6 +337,7 @@ export default function Navbar() {
                 className="block px-3 py-2.5 text-sm text-white bg-[#25D366] hover:bg-[#1fb657] rounded-lg transition-colors font-semibold"
               >
                 Discuter avec le gerant sur WhatsApp
+                              Discuter avec le gérant sur WhatsApp
               </a>
             </div>
           </motion.div>

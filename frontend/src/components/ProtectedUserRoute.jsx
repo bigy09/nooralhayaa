@@ -6,7 +6,7 @@ export function ProtectedUserRoute({ children }) {
   const location = useLocation()
 
   if (loading) {
-    return <div className="min-h-screen bg-[#F9EAE1] pt-32 px-4 text-center text-[#8C6239]/70">Verification de session...</div>
+    return <div className="min-h-screen bg-[#F9EAE1] pt-32 px-4 text-center text-[#8C6239]/70">Vérification de session...</div>
   }
 
   if (!isUserAuthenticated) {

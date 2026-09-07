@@ -49,13 +49,13 @@ export default function Footer() {
         <div className="flex flex-wrap justify-center gap-6 text-xs text-white/40">
           <span className="flex items-center gap-1.5"><Phone size={11} className="text-[#C5A059]" />{contactPhone}</span>
           <span className="flex items-center gap-1.5"><Mail size={11} className="text-[#C5A059]" />contact@nooralhayaa.com</span>
-          <span className="flex items-center gap-1.5"><MapPin size={11} className="text-[#C5A059]" />Dakar, Senegal</span>
+          <span className="flex items-center gap-1.5"><MapPin size={11} className="text-[#C5A059]" />Abidjan, Côte d’Ivoire</span>
         </div>
       </div>
 
       <div className="border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between text-xs text-white/30 gap-2">
-          <span>(c) 2026 NOOR AL HAYAA. Tous droits reserves.</span>
+          <span>© 2026 NOOR AL HAYAA. Tous droits réservés.</span>
           <span>Paiement Mobile Money • Contact WhatsApp</span>
         </div>
       </div>

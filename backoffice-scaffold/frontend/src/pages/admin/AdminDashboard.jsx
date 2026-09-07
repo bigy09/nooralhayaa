@@ -66,7 +66,8 @@ export default function AdminDashboard() {
   }
   async function loadOrders() {
     const data = await authFetch('/api/admin/orders?limit=50');
-    setOrders(Array.isArray(data.orders) ? data.orders : []);
+    const nextOrders = Array.isArray(data) ? data : data?.orders;
+    setOrders(Array.isArray(nextOrders) ? nextOrders : []);
   }
   async function loadProducts() {
     const q = new URLSearchParams({ limit: '50' });

@@ -249,7 +249,7 @@ export default function HomePage() {
                       {String(index + 1).padStart(2, '0')}
                     </span>
                     <h3 className="mt-5 text-2xl font-semibold capitalize text-[#8C6239]">{category.name}</h3>
-                    <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#8C6239]/70">Pieces essentielles, coupe elegante.</p>
+                    <p className="mt-3 max-w-xs text-sm leading-relaxed text-[#8C6239]/70">Pièces essentielles, coupe élégante.</p>
                   </div>
                   <div className="relative mt-6 h-36 overflow-hidden rounded-[1.5rem] bg-[#efe1d6]">
                     <div className="absolute inset-0 opacity-90" style={{ background: `linear-gradient(145deg, ${category.swatches?.[0] || BRAND.gold}, ${category.swatches?.[1] || BRAND.brown})` }} />
@@ -274,8 +274,8 @@ export default function HomePage() {
         <div className="grid gap-6 lg:grid-cols-2">
           <EditorialCard
             title="Pour elle, des silhouettes fluides et affirmées"
-            subtitle="Edition Femme"
-            description="Une selection feminine sobre, elegante et moderne."
+            subtitle="Édition Femme"
+            description="Une sélection féminine, sobre et moderne."
             image={womenHeroVisual.image}
             background={womenHeroVisual.background}
             to="/femme"

@@ -45,13 +45,13 @@ const MENU = [
   { key: 'products', label: 'Produits', icon: BarChart3 },
   { key: 'clients', label: 'Clients', icon: Users },
   { key: 'analytics', label: 'Analytique', icon: BarChart3 },
-  { key: 'settings', label: 'Parametres', icon: Settings },
+  { key: 'settings', label: 'Paramètres', icon: Settings },
 ]
 
 function MiniChart({ data, metric }) {
   const maxValue = Math.max(1, ...data.map((d) => Number(d[metric] || 0)) )
   return (
-    <div className="rounded-xl border border-[#C5A059]/15 bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-4 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
       <div className="flex items-end gap-2 h-44">
         {data.map((item) => {
           const value = Number(item[metric] || 0)
@@ -131,7 +131,8 @@ export default function AdminDashboard() {
 
   async function loadOrders() {
     const data = await authFetch('/api/admin/orders?limit=50')
-    setOrders(Array.isArray(data.orders) ? data.orders : [])
+    const nextOrders = Array.isArray(data) ? data : data?.orders
+    setOrders(Array.isArray(nextOrders) ? nextOrders : [])
   }
 
   async function loadProducts() {
@@ -180,7 +181,7 @@ export default function AdminDashboard() {
       })
 
       setPasswordForm({ currentPassword: '', newPassword: '' })
-      setPasswordFeedback({ type: 'success', message: 'Mot de passe modifie. Reconnectez-vous.' })
+      setPasswordFeedback({ type: 'success', message: 'Mot de passe modifié. Reconnectez-vous.' })
 
       setTimeout(async () => {
         await logoutAdmin()
@@ -257,7 +258,7 @@ export default function AdminDashboard() {
 
   function exportProducts() {
     const rows = [
-      ['Nom', 'Categorie', 'Prix', 'Inventaire', 'Visible', 'Epuisé'],
+      ['Nom', 'Catégorie', 'Prix', 'Inventaire', 'Visible', 'Épuisé'],
       ...products.map((p) => [p.name, p.categorySlug, p.price, p.inventory ?? 0, p.isVisible ? 'oui' : 'non', p.isOutOfStock ? 'oui' : 'non']),
     ]
     const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(',')).join('\n')
@@ -293,7 +294,7 @@ export default function AdminDashboard() {
               logoutAdmin()
               navigate('/')
             }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#8C6239] text-white hover:bg-[#C5A059] transition-colors text-sm font-medium"
           >
             <LogOut size={16} /> Deconnexion
           </button>
@@ -301,7 +302,7 @@ export default function AdminDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid lg:grid-cols-[250px_1fr] gap-6">
-        <aside className="rounded-xl border border-[#C5A059]/15 bg-white p-4 h-fit">
+        <aside className="rounded-2xl border border-[#C5A059]/18 bg-white p-4 h-fit shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
           {MENU.map((item) => (
             <button
               key={item.key}
@@ -324,7 +325,7 @@ export default function AdminDashboard() {
                 { label: 'En cours', value: stats.inProgressOrders, icon: TrendingUp, color: 'text-purple-600' },
                 { label: 'Ventes mensuelles', value: `${stats.monthSales.toLocaleString('fr-FR')} F CFA`, icon: TrendingUp, color: 'text-green-600' },
               ].map((stat) => (
-                <div key={stat.label} className="rounded-xl border border-[#C5A059]/15 bg-white p-6 shadow-sm">
+                <div key={stat.label} className="rounded-2xl border border-[#C5A059]/18 bg-white p-6 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-sm font-medium text-[#8C6239]/60">{stat.label}</p>
                     <stat.icon size={20} className={stat.color} />
@@ -337,7 +338,7 @@ export default function AdminDashboard() {
 
           {activeView === 'dashboard' && (
             <>
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-4 shadow-sm mb-6">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-4 shadow-[0_18px_45px_rgba(140,98,57,0.10)] mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-lg font-semibold text-[#8C6239]">Semaine</h2>
                   <div className="flex items-center gap-2">
@@ -359,9 +360,9 @@ export default function AdminDashboard() {
                 <MiniChart data={stats.weekly} metric={chartTab} />
               </div>
 
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white shadow-[0_18px_45px_rgba(140,98,57,0.10)] overflow-hidden">
                 <div className="px-6 py-4 border-b border-[#F9EAE1]">
-                  <h2 className="text-lg font-semibold text-[#8C6239]">Commandes recentes</h2>
+                  <h2 className="text-lg font-semibold text-[#8C6239]">Commandes récentes</h2>
                 </div>
                 <ul className="divide-y divide-[#F9EAE1]">
                   {stats.recentOrders.map((order) => (
@@ -385,7 +386,7 @@ export default function AdminDashboard() {
                   <button
                     key={filter.key || 'all'}
                     onClick={() => setOrderFilter(filter.key)}
-                    className={`px-3 py-1.5 rounded-full text-xs ${orderFilter === filter.key ? 'bg-[#8C6239] text-white' : 'bg-white border border-[#C5A059]/25 text-[#8C6239]'}`}
+                    className={`px-3 py-1.5 rounded-full text-xs ${orderFilter === filter.key ? 'bg-[#8C6239] text-white' : 'bg-[#fffaf5] border border-[#C5A059]/25 text-[#8C6239]'}`}
                   >
                     {filter.label}
                   </button>
@@ -393,13 +394,13 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={loadOrders}
-                  className="ml-auto rounded-full border border-[#C5A059]/25 bg-white px-3 py-1.5 text-xs text-[#8C6239] hover:bg-[#F9EAE1]"
+                  className="ml-auto rounded-full border border-[#C5A059]/25 bg-[#fffaf5] px-3 py-1.5 text-xs text-[#8C6239] hover:bg-[#F9EAE1]"
                 >
                   Actualiser
                 </button>
               </div>
 
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white shadow-[0_18px_45px_rgba(140,98,57,0.10)] overflow-hidden">
                 <div className="px-6 py-4 border-b border-[#F9EAE1]"><h2 className="text-lg font-semibold text-[#8C6239]">Liste des commandes</h2></div>
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -435,7 +436,7 @@ export default function AdminDashboard() {
               </div>
 
               {expandedOrder && (
-                <div className="mt-6 rounded-xl border border-[#C5A059]/15 bg-white shadow-sm p-6">
+                <div className="mt-6 rounded-2xl border border-[#C5A059]/18 bg-white shadow-[0_18px_45px_rgba(140,98,57,0.10)] p-6">
                   {filteredOrders.filter((o) => o._id === expandedOrder).map((order) => (
                     <div key={order._id}>
                       <h3 className="text-lg font-semibold text-[#8C6239] mb-4">Details de {order.orderNumber}</h3>
@@ -476,7 +477,7 @@ export default function AdminDashboard() {
                                 Contacter (WhatsApp)
                               </a>
                             ) : (
-                              <button disabled className="px-3 py-2 rounded-lg bg-gray-200 text-gray-600 text-sm">Sans numero</button>
+                              <button disabled className="px-3 py-2 rounded-lg bg-gray-200 text-gray-600 text-sm">Sans numéro</button>
                             )}
 
                             <button
@@ -488,7 +489,7 @@ export default function AdminDashboard() {
                                 }
                                 await loadProducts()
                               }}
-                              className="px-3 py-2 rounded-lg bg-orange-100 text-[#8C6239] text-sm font-semibold"
+                              className="px-3 py-2 rounded-full bg-[#F4DFD1] text-[#8C6239] text-sm font-semibold hover:bg-[#C5A059] hover:text-white transition-colors"
                             >
                               Marquer indisponible
                             </button>
@@ -502,16 +503,16 @@ export default function AdminDashboard() {
 
           {activeView === 'products' && (
             <div className="space-y-6">
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white shadow-[0_18px_45px_rgba(140,98,57,0.10)] overflow-hidden">
                 <div className="px-6 py-4 border-b border-[#F9EAE1] flex flex-wrap gap-3 items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-[#8C6239]">Produits</h2>
-                    <p className="text-sm text-[#8C6239]/60">Voir tous les produits et créer de nouveaux articles visibles en boutique.</p>
+                    <p className="text-sm text-[#8C6239]/60">Gérer les produits de la boutique.</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="relative">
                       <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8C6239]/55" />
-                      <input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Recherche nom/categorie" className="rounded-lg border border-[#C5A059]/25 py-2 pl-8 pr-3 text-sm" />
+                      <input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Rechercher un nom ou une catégorie" className="rounded-lg border border-[#C5A059]/25 py-2 pl-8 pr-3 text-sm" />
                     </div>
                     <button onClick={exportProducts} className="px-3 py-2 rounded-lg bg-[#8C6239] text-white text-xs font-semibold">Exporter</button>
                   </div>
@@ -521,7 +522,7 @@ export default function AdminDashboard() {
                     <thead className="bg-[#F9EAE1]/30">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Produit</th>
-                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Categorie</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Catégorie</th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Prix</th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Inventaire</th>
                         <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Visible</th>
@@ -535,7 +536,7 @@ export default function AdminDashboard() {
                           <td className="px-6 py-4 text-sm text-[#8C6239]/75">{product.categorySlug}</td>
                           <td className="px-6 py-4 text-sm text-[#C5A059] font-semibold">{Number(product.price || 0).toLocaleString('fr-FR')} F CFA</td>
                           <td className="px-6 py-4 text-sm text-[#8C6239]/75">{product.inventory ?? 0}</td>
-                          <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isVisible: !product.isVisible })} className={`px-2.5 py-1 rounded-full text-xs ${product.isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{product.isVisible ? 'Visible' : 'Masque'}</button></td>
+                          <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isVisible: !product.isVisible })} className={`px-2.5 py-1 rounded-full text-xs ${product.isVisible ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>{product.isVisible ? 'Visible' : 'Masqué'}</button></td>
                           <td className="px-6 py-4"><button onClick={() => updateProduct(product._id, { isOutOfStock: !product.isOutOfStock })} className={`px-2.5 py-1 rounded-full text-xs ${product.isOutOfStock ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>{product.isOutOfStock ? 'Oui' : 'Non'}</button></td>
                         </tr>
                       ))}
@@ -544,7 +545,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-6 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
                 <div className="flex items-center gap-2 mb-4">
                   <Plus size={18} className="text-[#8C6239]" />
                   <h3 className="text-lg font-semibold text-[#8C6239]">Créer un nouveau produit</h3>
@@ -652,7 +653,7 @@ export default function AdminDashboard() {
           )}
 
           {activeView === 'clients' && (
-            <div className="rounded-xl border border-[#C5A059]/15 bg-white shadow-sm overflow-hidden">
+            <div className="rounded-2xl border border-[#C5A059]/18 bg-white shadow-[0_18px_45px_rgba(140,98,57,0.10)] overflow-hidden">
               <div className="px-6 py-4 border-b border-[#F9EAE1]"><h2 className="text-lg font-semibold text-[#8C6239]">Clients</h2></div>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -661,7 +662,7 @@ export default function AdminDashboard() {
                       <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Email</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Inscription</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Commandes</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Depense</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-[#8C6239]">Dépensé</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F9EAE1]">
@@ -682,7 +683,7 @@ export default function AdminDashboard() {
 
           {activeView === 'analytics' && (
             <div className="grid gap-6 md:grid-cols-2">
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-5 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
                 <h3 className="text-base font-semibold text-[#8C6239] mb-3">Repartition paiements</h3>
                 <ul className="space-y-2">
                   {analytics.paymentBreakdown.map((row) => (
@@ -694,7 +695,7 @@ export default function AdminDashboard() {
                 </ul>
               </div>
 
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-5 shadow-sm">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-5 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
                 <h3 className="text-base font-semibold text-[#8C6239] mb-3">Repartition statuts</h3>
                 <ul className="space-y-2">
                   {analytics.statusBreakdown.map((row) => (
@@ -706,7 +707,7 @@ export default function AdminDashboard() {
                 </ul>
               </div>
 
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-5 shadow-sm md:col-span-2">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-5 shadow-[0_18px_45px_rgba(140,98,57,0.10)] md:col-span-2">
                 <h3 className="text-base font-semibold text-[#8C6239] mb-3">Top produits</h3>
                 <ul className="space-y-2">
                   {analytics.topProducts.map((row) => (
@@ -722,7 +723,7 @@ export default function AdminDashboard() {
 
           {activeView === 'settings' && (
             <div className="space-y-6">
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-6 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
                 <h2 className="text-lg font-semibold text-[#8C6239] mb-2">Securite admin</h2>
                 <p className="text-sm text-[#8C6239]/65 mb-4">Changer le mot de passe invalide toutes les sessions actives.</p>
 
@@ -739,7 +740,7 @@ export default function AdminDashboard() {
                     type="password"
                     value={passwordForm.newPassword}
                     onChange={(e) => setPasswordForm((prev) => ({ ...prev, newPassword: e.target.value }))}
-                    placeholder="Nouveau mot de passe (8+ caracteres)"
+                    placeholder="Nouveau mot de passe (8+ caractères)"
                     className="w-full px-3 py-2 rounded-lg border border-[#C5A059]/25 text-sm"
                     minLength={8}
                     required
@@ -753,7 +754,7 @@ export default function AdminDashboard() {
                 </form>
               </div>
 
-              <div className="rounded-xl border border-[#C5A059]/15 bg-white p-6 shadow-sm">
+              <div className="rounded-2xl border border-[#C5A059]/18 bg-white p-6 shadow-[0_18px_45px_rgba(140,98,57,0.10)]">
                 <h2 className="text-lg font-semibold text-[#8C6239] mb-2">Journal d'audit</h2>
                 <p className="text-sm text-[#8C6239]/65 mb-4">Dernieres actions sensibles effectuees par les admins.</p>
                 <ul className="divide-y divide-[#F9EAE1]">

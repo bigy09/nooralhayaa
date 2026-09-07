@@ -26,7 +26,7 @@ const PAYMENT_METHODS = [
     icon: Smartphone,
     color: 'text-[#f67f20]',
     activeStyle: 'border-[#ffd9ba] bg-[#fff5ec]',
-    description: 'Paiement sur le numero 0716557419.',
+    description: 'Paiement sur le numéro 0716557419.',
   },
   {
     id: 'moov',
@@ -35,7 +35,7 @@ const PAYMENT_METHODS = [
     icon: MessageCircle,
     color: 'text-[#0086ff]',
     activeStyle: 'border-[#bedeff] bg-[#f0f8ff]',
-    description: 'Paiement sur le numero 0161136379.',
+    description: 'Paiement sur le numéro 0161136379.',
   },
   {
     id: 'mtn',
@@ -44,15 +44,15 @@ const PAYMENT_METHODS = [
     icon: Smartphone,
     color: 'text-[#f7c300]',
     activeStyle: 'border-[#ffe48a] bg-[#fffceb]',
-    description: 'Paiement sur le numero 0500838940.',
+    description: 'Paiement sur le numéro 0500838940.',
   },
 ]
 
 function TrustStrip() {
   const items = [
-    { icon: Shield, title: 'Paiement protege', text: 'Flux securise et verification commande.' },
-    { icon: Truck, title: 'Livraison suivie', text: 'Notification de suivi apres validation.' },
-    { icon: Clock3, title: 'Support reactif', text: 'Assistance rapide pour les paiements mobile money.' },
+    { icon: Shield, title: 'Paiement protégé', text: 'Vérification de la commande.' },
+    { icon: Truck, title: 'Livraison suivie', text: 'Suivi après validation.' },
+    { icon: Clock3, title: 'Support réactif', text: 'Assistance pour le paiement.' },
   ]
 
   return (
@@ -140,10 +140,10 @@ export default function CheckoutPage() {
           <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-[0_12px_35px_rgba(140,98,57,0.12)]">
             <Truck size={38} className="text-[#C5A059]" />
           </div>
-          <h1 className="text-2xl font-semibold text-[#8C6239]">Aucune commande a finaliser</h1>
+          <h1 className="text-2xl font-semibold text-[#8C6239]">Aucune commande à finaliser</h1>
           <p className="mt-3 text-sm text-[#8C6239]/65">Ton panier est vide pour le moment.</p>
           <Link to="/shop" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#8C6239] px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all hover:bg-[#C5A059]">
-            <ArrowLeft size={16} /> Retour a la boutique
+            <ArrowLeft size={16} /> Retour à la boutique
           </Link>
         </div>
       </div>
@@ -153,8 +153,8 @@ export default function CheckoutPage() {
   function validate() {
     const nextErrors = {}
     if (!form.name.trim()) nextErrors.name = 'Nom requis'
-    if (!form.phone.trim()) nextErrors.phone = 'Numero requis'
-    else if (!/^\+?[0-9]{8,15}$/.test(form.phone.replace(/\s/g, ''))) nextErrors.phone = 'Numero invalide'
+    if (!form.phone.trim()) nextErrors.phone = 'Numéro requis'
+    else if (!/^\+?[0-9]{8,15}$/.test(form.phone.replace(/\s/g, ''))) nextErrors.phone = 'Numéro invalide'
     if (!form.address.trim()) nextErrors.address = 'Adresse requise'
     if (!form.deliveryZone) nextErrors.deliveryZone = 'Sélectionne une zone de livraison'
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) nextErrors.email = 'Email invalide'
@@ -216,7 +216,7 @@ export default function CheckoutPage() {
       setStep(3)
     } catch (error) {
       console.error('Order submission error:', error)
-      globalThis.alert(error.message || 'Une erreur est survenue. Merci de reessayer.')
+      globalThis.alert(error.message || 'Une erreur est survenue. Merci de réessayer.')
     } finally {
       setLoading(false)
     }
@@ -265,7 +265,7 @@ export default function CheckoutPage() {
                 <div className="space-y-4">
                   {[
                       { key: 'name', label: 'Nom complet *', placeholder: 'Ton nom complet', type: 'text' },
-                      { key: 'phone', label: 'Numero de telephone *', placeholder: '+225 0X XX XX XX XX', type: 'tel' },
+                      { key: 'phone', label: 'Numéro de téléphone *', placeholder: '+225 0X XX XX XX XX', type: 'tel' },
                       { key: 'email', label: 'Adresse email', placeholder: 'prenom@exemple.com', type: 'email' },
                       { key: 'address', label: 'Adresse de livraison', placeholder: 'Rue, quartier, ville', type: 'text' },
                   ].map((field) => (
@@ -448,9 +448,9 @@ export default function CheckoutPage() {
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#eaf6ea]">
                   <Check size={28} className="text-green-600" />
                 </div>
-                <h2 className="text-2xl font-semibold text-[#8C6239]">Commande {order?.orderNumber} enregistree</h2>
+                <h2 className="text-2xl font-semibold text-[#8C6239]">Commande {order?.orderNumber} enregistrée</h2>
                 <p className="mt-2 text-sm text-[#8C6239]/65">
-                  Effectue le paiement de <span className="font-semibold">{formatPrice(order?.paymentAmount || 0)}</span> via {getPaymentMethodDetails(method).label} sur le numero {(paymentConfig.paymentNumbers?.[method] || getPaymentMethodDetails(method).number)}.
+                  Effectue le paiement de <span className="font-semibold">{formatPrice(order?.paymentAmount || 0)}</span> via {getPaymentMethodDetails(method).label} sur le numéro {(paymentConfig.paymentNumbers?.[method] || getPaymentMethodDetails(method).number)}.
                 </p>
                 <p className="mt-2 text-xs text-[#8C6239]/55">
                   Ta commande reste <span className="font-semibold">en attente</span> tant que le paiement n'a pas été confirmé par notre équipe. Tu peux l'annuler dans les 10 minutes depuis "Mes commandes" si besoin.

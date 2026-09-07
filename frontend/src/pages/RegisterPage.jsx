@@ -50,7 +50,7 @@ export default function RegisterPage() {
           <X size={16} />
         </button>
         <h1 className="text-2xl font-semibold text-[#8C6239]">Inscription client</h1>
-        <p className="mt-2 text-sm text-[#8C6239]/65">Cree ton compte pour commander et suivre ton historique.</p>
+        <p className="mt-2 text-sm text-[#8C6239]/65">Crée ton compte pour commander et suivre ton historique.</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <label className="block">
@@ -101,7 +101,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-xl border border-[#C5A059]/28 bg-[#fffdfa] py-3 pl-9 pr-3 text-sm text-[#8C6239] outline-none focus:border-[#C5A059]"
-                placeholder="8 caracteres minimum"
+                placeholder="8 caractères minimum"
               />
             </div>
           </label>
@@ -129,12 +129,12 @@ export default function RegisterPage() {
             disabled={loading}
             className="w-full rounded-full bg-[#8C6239] py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C5A059] disabled:opacity-60"
           >
-            {loading ? 'Creation...' : 'Creer mon compte'}
+            {loading ? 'Création...' : 'Créer mon compte'}
           </button>
         </form>
 
         <p className="mt-5 text-sm text-[#8C6239]/65">
-          Deja un compte ?{' '}
+          Déjà un compte ?{' '}
           <Link to="/login" state={{ from: nextPath }} className="font-semibold text-[#C5A059] hover:text-[#8C6239]">
             Se connecter
           </Link>
