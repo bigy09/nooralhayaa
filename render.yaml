@@ -5,8 +5,8 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: cd backend && npm install --no-audit --no-fund
-    startCommand: cd backend && npm start
+    buildCommand: npm install --workspace=app-assata-server
+    startCommand: npm run start --workspace=app-assata-server
     envVars:
       - key: NODE_VERSION
         value: 20
@@ -25,9 +25,11 @@ services:
     name: app-assata-frontend
     runtime: static
     rootDir: .
-    buildCommand: cd frontend && npm install --no-audit --no-fund --workspaces=false && npm run build
+    buildCommand: npm install --workspace=app-assata-client && npm run build --workspace=app-assata-client
     staticPublishPath: frontend/dist
     envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
       - key: VITE_API_URL
         sync: false
     routes:

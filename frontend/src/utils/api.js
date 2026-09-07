@@ -1,5 +1,6 @@
 export function getApiBaseUrl() {
-  const raw = (import.meta.env.VITE_API_BASE_URL || '').trim()
+  const configuredBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL
+  const raw = (configuredBase || (import.meta.env.PROD ? 'https://nooralhayaa.onrender.com' : '')).trim()
   if (!raw) return ''
   return raw.replace(/\/$/, '')
 }
