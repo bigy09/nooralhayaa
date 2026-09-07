@@ -83,6 +83,7 @@ function applyUpdate(document, update) {
 }
 
 function nestedValue(record, path) {
+  if (path === 'id' || path === '_id') return record._id || record.id
   return path.split('.').reduce((current, key) => current?.[key], record)
 }
 
