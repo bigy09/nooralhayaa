@@ -216,7 +216,7 @@ export default function CheckoutPage() {
       setStep(3)
     } catch (error) {
       console.error('Order submission error:', error)
-      alert('Une erreur est survenue. Merci de reessayer.')
+      globalThis.alert(error.message || 'Une erreur est survenue. Merci de reessayer.')
     } finally {
       setLoading(false)
     }

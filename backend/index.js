@@ -113,6 +113,24 @@ const paymentDirectory = {
   orange: { label: 'Orange Money', number: PAYMENT_NUMBERS.orange, operator: 'Orange' },
 };
 
+const localCatalogProducts = {
+  f1: { name: 'Robe Nourah', price: 7000 },
+  f2: { name: 'Robe Nourah', price: 7000 },
+  f3: { name: 'Robe Nadira', price: 7000 },
+  f4: { name: 'Robe Nadira', price: 7000 },
+  f5: { name: 'Tunique Meetah', price: 12000 },
+  f6: { name: 'Tunique Meetah', price: 12000 },
+  f7: { name: 'Tunique Meetah', price: 12000 },
+  f8: { name: 'Boubou Anta', price: 9500 },
+  f9: { name: 'Boubou Anta', price: 9500 },
+  f10: { name: 'Abaya Fatim', price: 7500 },
+  f11: { name: 'Boubou Aïcha', price: 9000 },
+  f12: { name: 'Boubou Roky', price: 9000 },
+  f13: { name: 'Abaya Mouna', price: 7000 },
+  f14: { name: 'Ensemble Makila', price: 10000 },
+  f15: { name: 'Ensemble Makila', price: 10000 },
+};
+
 const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email().transform((value) => value.toLowerCase()),
@@ -1013,10 +1031,13 @@ app.post('/api/orders', verifyToken, requireUser, async (req, res) => {
     // courant de chaque produit en base et on recalcule subtotal/shipping/total.
     const resolvedItems = [];
     for (const item of payload.items) {
-      if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
-        return res.status(400).json({ error: `Produit invalide: ${item.productId}` });
+      if (!item.productId) return res.status(400).json({ error: 'Produit invalide' });
+      let product = null;
+      if (mongoose.Types.ObjectId.isValid(item.productId)) {
+        product = await Product.findById(item.productId).select('name price images inventory isVisible');
+      } else {
+        product = localCatalogProducts[item.productId] || null;
       }
-      const product = await Product.findById(item.productId).select('name price images inventory isVisible');
       if (!product) return res.status(400).json({ error: `Produit introuvable: ${item.name || item.productId}` });
       const qty = Math.max(1, Number(item.quantity) || 1);
       resolvedItems.push({

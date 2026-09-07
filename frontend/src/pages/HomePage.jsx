@@ -17,7 +17,6 @@ const BRAND = {
 }
 
 const womenKeywords = ['abaya', 'kimono', 'robe', 'nour', 'haya', 'safa', 'rahma', 'samira']
-const menKeywords = ['boubou', 'qamis', 'omar', 'bilal', 'nabil', 'youssef']
 
 function SectionHeading({ eyebrow, title, body, align = 'left' }) {
   return (
@@ -211,12 +210,6 @@ export default function HomePage() {
     return products.filter((product) => womenKeywords.some((keyword) => product.name.toLowerCase().includes(keyword)))
   }, [products])
 
-  const menProducts = useMemo(() => {
-    const explicit = products.filter((product) => menKeywords.some((keyword) => product.name.toLowerCase().includes(keyword)))
-    if (explicit.length) return explicit
-    return products.filter((product) => product.categorySlug === 'pantalons').slice(0, 6)
-  }, [products])
-
   const categoryCards = categories.map((category, index) => {
     const categorySlug = category.slug === 'kimonos' ? 'abayas-kimonos' : category.slug
     const categoryProduct = LOCAL_PRODUCTS.find((product) => product.categorySlug === categorySlug)
@@ -230,7 +223,6 @@ export default function HomePage() {
   }).filter((category) => category.image)
 
   const womenHeroVisual = getProductVisual(womenProducts[0] || products[0])
-  const menHeroVisual = getProductVisual(menProducts[0] || products[1])
 
   return (
     <div className="min-h-screen bg-[#F9EAE1] text-[#8C6239]">
@@ -289,16 +281,6 @@ export default function HomePage() {
             to="/femme"
             accent={BRAND.brown}
           />
-          <EditorialCard
-            title="Pour lui, des coupes sobres au caractere fort"
-            subtitle="Edition Homme"
-            description="Une selection masculine nette, confortable et chic."
-            image={menHeroVisual.image}
-            background={menHeroVisual.background}
-            to="/homme"
-            accent={BRAND.gold}
-            delay={0.12}
-          />
         </div>
       </section>
 
@@ -311,7 +293,6 @@ export default function HomePage() {
         />
       )}
 
-      {/* Homme selection hidden — partie Homme indisponible */}
     </div>
   )
 }
