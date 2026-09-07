@@ -68,7 +68,12 @@ app.use(
       if (corsWhitelist.includes(origin)) return callback(null, true);
       try {
         const url = new URL(origin);
-        if (url.hostname.endsWith('.railway.app') || url.hostname.endsWith('.nooralhayaa.pages.dev')) return callback(null, true);
+        if (
+          url.hostname.endsWith('.railway.app')
+          || url.hostname.endsWith('.nooralhayaa.pages.dev')
+          || url.hostname === 'nooralhayaa.net'
+          || url.hostname === 'www.nooralhayaa.net'
+        ) return callback(null, true);
         // En dev, Vite change de port automatiquement si le port par défaut est déjà
         // pris (5173 -> 5174 -> ...). Plutôt que de casser silencieusement toutes les
         // requêtes API à chaque décalage de port, on autorise tout localhost en dev.
