@@ -804,15 +804,9 @@ app.post('/api/auth/logout-all', verifyToken, async (req, res) => {
 
 app.get('/api/auth/me', verifyToken, async (req, res) => {
   try {
-    // Support both mongoose models and the mock DB implementation.
-    let userQuery = User.findById(req.auth.sub);
-    let user;
-
-    if (userQuery && typeof userQuery.select === 'function') {
-      user = await userQuery.select('_id name email role createdAt');
-    } else {
-      user = await userQuery; // mock DB returns the object directly
-    }
+    // The email lookup is stable across Mongo ObjectIds and Supabase UUIDs.
+    let user = req.auth.email ? await User.findOne({ email: req.auth.email }) : null;
+    if (!user) user = await User.findById(req.auth.sub);
 
     if (!user) return res.status(404).json({ error: 'User not found' });
     return res.json({ id: user._id || user.id, name: user.name || '', email: user.email, role: user.role, preferredLocation: user.preferredLocation || '', createdAt: user.createdAt });
