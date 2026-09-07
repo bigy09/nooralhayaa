@@ -168,7 +168,7 @@ export async function initializeSupabase() {
 
   const client = createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    realtime: { WebSocket },
+    realtime: { transport: WebSocket },
   })
   const { error } = await client.from('users').select('id').limit(1)
   if (error) throw new Error(`Supabase connection failed: ${error.message}`)
