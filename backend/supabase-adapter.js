@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import WebSocket from 'ws'
 
 const FIELD_MAP = {
   _id: 'id',
@@ -165,7 +166,10 @@ export async function initializeSupabase() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!url || !key) return null
 
-  const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
+  const client = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { WebSocket },
+  })
   const { error } = await client.from('users').select('id').limit(1)
   if (error) throw new Error(`Supabase connection failed: ${error.message}`)
 
