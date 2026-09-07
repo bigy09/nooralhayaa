@@ -33,7 +33,7 @@ const USER_REFRESH_COOKIE = 'user_refresh_token';
 const ADMIN_REFRESH_COOKIE = 'admin_refresh_token';
 const isProduction = process.env.NODE_ENV === 'production';
 const PAYMENT_MINIMUM = Number(process.env.PAYMENT_MINIMUM || 2020);
-const OFFICIAL_WHATSAPP = '2250161136379';
+const OFFICIAL_WHATSAPP = '2250500838940';
 const CONTACT_WHATSAPP = OFFICIAL_WHATSAPP;
 const INFOLINE_PHONE = OFFICIAL_WHATSAPP;
 const PAYMENT_NUMBERS = {
