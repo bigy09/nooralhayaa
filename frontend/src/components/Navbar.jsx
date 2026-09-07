@@ -81,11 +81,13 @@ export default function Navbar() {
       <div className={`border-b transition-all duration-500 ${surfaceTop}`}>
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
           <Link to="/" className="flex flex-shrink-0 items-center gap-2" aria-label="Accueil NOOR AL HAYAA">
-            <img
-              src={logoNoor}
-              alt="Logo NOOR AL HAYAA"
-              className="h-12 w-16 rounded-md border border-white/30 bg-white p-1 object-contain shadow-sm"
-            />
+            <span className="flex h-14 w-28 items-center justify-center overflow-hidden rounded-md border border-white/30 bg-white shadow-sm">
+              <img
+                src={logoNoor}
+                alt="Logo NOOR AL HAYAA"
+                className="h-full w-full scale-[1.55] object-cover"
+              />
+            </span>
           </Link>
 
           <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-sm mx-4">
