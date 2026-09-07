@@ -4,7 +4,7 @@ import { Star, ShoppingBag, Heart } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { formatPrice } from '../utils/payment'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 
 function Stars({ rating }) {
   return (
@@ -43,7 +43,7 @@ export default function ProductCard2({ product, index = 0 }) {
           {imageSrc ? (
             <img
               src={imageSrc}
-              alt={product.name}
+              alt={getProductImageAlt(product)}
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
           ) : (

@@ -1,11 +1,12 @@
 ﻿import { Link } from 'react-router-dom'
 import { Globe, Camera, MessageCircle, Phone, Mail, MapPin } from 'lucide-react'
 import { useSiteConfig } from '../hooks/useSiteConfig'
+import { buildWhatsAppLink, WHATSAPP_DISPLAY } from '../config/site'
 
 export default function Footer() {
-  const { config } = useSiteConfig()
-  const contactPhone = config.infoline || config.whatsapp || '+225 07 02 39 60 63'
-  const whatsappUrl = `https://wa.me/${(config.whatsapp || '2250702396063').replace(/\D/g, '')}`
+  useSiteConfig()
+  const contactPhone = WHATSAPP_DISPLAY
+  const whatsappUrl = buildWhatsAppLink()
   return (
     <footer className="bg-black text-white">
       <div className="max-w-5xl mx-auto px-4 pt-10 pb-6">

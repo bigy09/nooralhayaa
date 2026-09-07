@@ -96,7 +96,7 @@ Update [frontend/src/utils/payment.js](../frontend/src/utils/payment.js):
 
 ```javascript
 export function generateWaveLink(order) {
-  const phone = process.env.REACT_APP_MERCHANT_PHONE || '2250702396063'; // Your Wave business phone number
+  const phone = process.env.REACT_APP_MERCHANT_PHONE || '2250161136379'; // Official WhatsApp number
   const amount = order.total;
   const description = `Commande ${order.id}`;
   
@@ -105,7 +105,7 @@ export function generateWaveLink(order) {
 }
 
 export function generateWhatsAppLink(order) {
-  const phone = process.env.REACT_APP_MERCHANT_PHONE || '2250702396063';
+  const phone = process.env.REACT_APP_MERCHANT_PHONE || '2250161136379';
   const message = `Commande: ${order.id}\nMontant: ${order.total} XOF\n\nVeuillez confirmer le paiement par WhatsApp`;
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }

@@ -8,7 +8,7 @@ import { LOCAL_PRODUCTS } from '../data/products'
 import { formatPrice } from '../utils/payment'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 
 const BRAND = {
   gold: '#C5A059',
@@ -96,7 +96,7 @@ function CollectionCard({ product, index }) {
         />
         <motion.img
           src={visual.image}
-          alt={product.name}
+          alt={getProductImageAlt(product)}
           className="absolute inset-x-0 bottom-0 h-full w-full object-cover"
           whileHover={{ scale: 1.05 }}
           transition={{ duration: 0.4 }}

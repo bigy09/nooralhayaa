@@ -20,7 +20,7 @@ export class WavePaymentService {
    * User receives the link and opens Wave app to complete payment
    */
   generatePaymentLink(order) {
-    const merchantPhone = process.env.WAVE_MERCHANT_PHONE || '2250702396063';
+    const merchantPhone = process.env.WAVE_MERCHANT_PHONE || '2250161136379';
     const amount = Math.round(order.total);
     const reference = order.orderNumber;
 

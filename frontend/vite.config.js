@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: [
-      { find: 'react', replacement: path.resolve(__dirname, 'node_modules/react') },
-      { find: 'react-dom', replacement: path.resolve(__dirname, 'node_modules/react-dom') },
+      { find: 'react', replacement: path.resolve(import.meta.dirname, 'node_modules/react') },
+      { find: 'react-dom', replacement: path.resolve(import.meta.dirname, 'node_modules/react-dom') },
     ],
   },
   server: {

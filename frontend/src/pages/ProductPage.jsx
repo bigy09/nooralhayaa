@@ -6,7 +6,8 @@ import { useProduct } from '../hooks/useApi'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { formatPrice } from '../utils/payment'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
+import { buildWhatsAppLink } from '../config/site'
 
 const panels = [
   {
@@ -94,7 +95,7 @@ export default function ProductPage() {
     const encodedText = encodeURIComponent(shareText)
     const encodedTitle = encodeURIComponent(`${product.name} - Photo: ${visual.image}`)
     const map = {
-      whatsapp: `https://wa.me/?text=${encodedText}`,
+      whatsapp: buildWhatsAppLink(shareText),
       x: `https://twitter.com/intent/tweet?text=${encodedText}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedTitle}`,
       telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
@@ -152,7 +153,7 @@ export default function ProductPage() {
           <div className="relative aspect-[4/5] p-6 md:p-10">
             <motion.img
               src={visual.image}
-              alt={product.name}
+              alt={getProductImageAlt(product)}
               className="h-full w-full object-cover rounded-[1.5rem] shadow-[0_30px_50px_rgba(84,49,24,0.18)]"
               key={`${product.id}-${selectedSwatch}`}
               initial={{ opacity: 0.4, scale: 0.98 }}

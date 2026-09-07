@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowRight, Heart, Search } from 'lucide-react'
@@ -6,13 +6,12 @@ import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useCategories, useProducts } from '../hooks/useApi'
 import { formatPrice } from '../utils/payment'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 
 function ShopCard({ product, index }) {
   const { add } = useCart()
   const { toggle, isLiked } = useWishlist()
   const visual = getProductVisual(product)
-  const visualStyle = { background: visual.background }
 
   return (
     <motion.article
@@ -31,7 +30,7 @@ function ShopCard({ product, index }) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.35),transparent_35%)]" />
         <img
           src={visual.image}
-          alt={product.name}
+          alt={getProductImageAlt(product)}
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
@@ -82,6 +81,9 @@ export default function ShopPage() {
   const activeCategory = searchParams.get('category') || ''
   const searchQuery = searchParams.get('search') || ''
   const sortBy = searchParams.get('sort') || 'featured'
+  const genderFilter = searchParams.get('gender') || ''
+  const minPrice = searchParams.get('minPrice') || ''
+  const maxPrice = searchParams.get('maxPrice') || ''
   const { categories } = useCategories()
 
   const categorize = (category) => {
@@ -103,11 +105,17 @@ export default function ShopPage() {
   const maleCategories = filteredCategories.filter((category) => category.group === 'homme')
   const selectedCategory = filteredCategories.find((category) => category.slug === activeCategory)
   const isMaleCategory = selectedCategory?.group === 'homme'
-  const requestCategory = isMaleCategory ? '' : activeCategory
+  const categoryAliases = {
+    kimonos: 'abayas-kimonos',
+  }
+  const requestCategory = isMaleCategory ? '' : (categoryAliases[activeCategory] || activeCategory)
 
   const { products, loading } = useProducts({
     ...(requestCategory ? { category: requestCategory } : {}),
     ...(searchQuery ? { search: searchQuery } : {}),
+    ...(genderFilter ? { gender: genderFilter } : {}),
+    ...(minPrice ? { minPrice } : {}),
+    ...(maxPrice ? { maxPrice } : {}),
   })
 
   useEffect(() => {
@@ -182,11 +190,29 @@ export default function ShopPage() {
         )}
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <button
-            onClick={() => setParam('category', '')}
+            onClick={() => setSearchParams({})}
             className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${!activeCategory ? 'bg-[#8C6239] text-white' : 'bg-white text-[#8C6239] border border-[#C5A059]/20'}`}
           >
             Tout
           </button>
+        </div>
+        <div className="mb-5 flex flex-wrap items-end gap-3 rounded-[1.5rem] border border-[#C5A059]/15 bg-white p-4 shadow-[0_12px_30px_rgba(140,98,57,0.06)]">
+          <label className="flex min-w-36 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
+            Genre
+            <select value={genderFilter} onChange={(event) => setParam('gender', event.target.value)} className="rounded-full border border-[#C5A059]/25 bg-white px-3 py-2 text-sm font-normal outline-none">
+              <option value="">Femme et Homme</option>
+              <option value="femme">Femme</option>
+              <option value="homme">Homme</option>
+            </select>
+          </label>
+          <label className="flex min-w-32 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
+            Prix minimum
+            <input type="number" min="0" value={minPrice} onChange={(event) => setParam('minPrice', event.target.value)} className="rounded-full border border-[#C5A059]/25 px-3 py-2 text-sm font-normal outline-none" placeholder="0" />
+          </label>
+          <label className="flex min-w-32 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
+            Prix maximum
+            <input type="number" min="0" value={maxPrice} onChange={(event) => setParam('maxPrice', event.target.value)} className="rounded-full border border-[#C5A059]/25 px-3 py-2 text-sm font-normal outline-none" placeholder="Sans limite" />
+          </label>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <div className="rounded-[1.85rem] border border-[#C5A059]/15 bg-white p-5 shadow-[0_18px_40px_rgba(140,98,57,0.08)]">

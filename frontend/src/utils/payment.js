@@ -1,3 +1,5 @@
+import { buildWhatsAppLink } from '../config/site'
+
 export function formatPrice(amount) {
   return amount.toLocaleString('fr-FR') + ' F CFA'
 }
@@ -13,13 +15,13 @@ const MOBILE_MONEY_METHODS = {
     label: 'Moov Money',
     number: '0161136379',
     operator: 'Moov',
-    paymentUrl: (amount = 2020) => `https://wa.me/225${String('0161136379').replace(/\D/g, '')}?text=${encodeURIComponent(`Bonjour, je souhaite payer ma commande via Moov Money de ${formatPrice(amount)}.`)}`,
+    paymentUrl: (amount = 2020) => buildWhatsAppLink(`Bonjour, je souhaite payer ma commande via Moov Money de ${formatPrice(amount)}.`),
   },
   mtn: {
     label: 'MTN Money',
     number: '0500838940',
     operator: 'MTN',
-    paymentUrl: (amount = 2020) => `https://wa.me/225${String('0500838940').replace(/\D/g, '')}?text=${encodeURIComponent(`Bonjour, je souhaite payer ma commande via MTN Money de ${formatPrice(amount)}.`)}`,
+    paymentUrl: (amount = 2020) => buildWhatsAppLink(`Bonjour, je souhaite payer ma commande via MTN Money de ${formatPrice(amount)}.`),
   },
   orange: {
     label: 'Orange Money',

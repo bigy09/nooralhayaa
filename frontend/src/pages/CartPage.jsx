@@ -4,7 +4,7 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ArrowLeft, Heart } from '
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { formatPrice } from '../utils/payment'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 
 export default function CartPage() {
   const { items, total, remove, updateQty, count } = useCart()
@@ -56,7 +56,7 @@ export default function CartPage() {
                   >
                     <Link to={`/product/${item.id}`} className="relative h-28 w-24 flex-shrink-0 overflow-hidden rounded-[1rem]">
                       <div className="absolute inset-0" style={{ background: visual.background }} />
-                      <img src={visual.image} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                      <img src={visual.image} alt={getProductImageAlt(item)} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                     </Link>
                     <div className="flex flex-1 min-w-0 flex-col justify-between">
                       <div className="flex items-start justify-between gap-2">

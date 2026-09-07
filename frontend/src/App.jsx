@@ -1,4 +1,4 @@
-import React from 'react' // eslint-disable-line no-unused-vars
+import React from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -18,11 +18,16 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import { usePageViewTracking } from './hooks/usePageViewTracking'
+import { SITE_NAME } from './config/site'
 
 function App() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
   usePageViewTracking()
+
+  React.useEffect(() => {
+    document.title = isAdminRoute ? `Administration - ${SITE_NAME}` : SITE_NAME
+  }, [isAdminRoute])
 
   return (
     <div className="min-h-screen bg-[#F9EAE1] flex flex-col">

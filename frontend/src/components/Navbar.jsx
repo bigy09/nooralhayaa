@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Heart, ShoppingBag, Search, User, Phone, Mail, Menu, X } from 'lucide-react'
+import { Heart, ShoppingBag, Search, User, Phone, Menu, X } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
 import { useSiteConfig } from '../hooks/useSiteConfig'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 import { formatPrice } from '../utils/payment'
 import logoNoor from '../assets/logo noor al.jpeg'
+import { buildWhatsAppLink, WHATSAPP_DISPLAY } from '../config/site'
 
 export default function Navbar() {
   const { count, items: cartItems, total } = useCart()
   const { count: wishCount, items: wishlistItems } = useWishlist()
   const { user, isUserAuthenticated, logoutUser } = useAuth()
-  const { config } = useSiteConfig()
+  useSiteConfig()
   const [scrolled, setScrolled] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -22,8 +23,7 @@ export default function Navbar() {
   const previewRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const whatsappNumber = config.whatsapp || '2250702396063'
-  const managerWhatsAppLink = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=Bonjour%20Noor%20Al%20Hayaa%2C%20je%20souhaite%20des%20informations%20sur%20vos%20articles.`
+  const managerWhatsAppLink = buildWhatsAppLink('Bonjour Noor Al Hayaa, je souhaite des informations sur vos articles.')
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20)
@@ -83,7 +83,7 @@ export default function Navbar() {
           <Link to="/" className="flex items-center gap-2">
             <img
               src={logoNoor}
-              alt="Noor Al Hayaa"
+              alt="Logo NOOR AL HAYAA"
               className="h-9 w-auto rounded-md border border-white/20 shadow-sm"
             />
           </Link>
@@ -214,7 +214,7 @@ export default function Navbar() {
                             <Link key={item.id} to={`/product/${item.id}`} className="flex items-center gap-3 rounded-xl p-2 hover:bg-[#F9EAE1] transition-colors">
                               <div className="relative h-12 w-10 overflow-hidden rounded-lg">
                                 <div className="absolute inset-0" style={{ background: visual.background }} />
-                                <img src={visual.image} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                                <img src={visual.image} alt={getProductImageAlt(item)} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                               </div>
                               <div className="min-w-0">
                                 <p className="truncate text-xs font-medium text-[#8C6239]">{item.name}</p>
@@ -243,7 +243,7 @@ export default function Navbar() {
                             <Link key={item.key} to="/cart" className="flex items-center gap-3 rounded-xl p-2 hover:bg-[#F9EAE1] transition-colors">
                               <div className="relative h-12 w-10 overflow-hidden rounded-lg">
                                 <div className="absolute inset-0" style={{ background: visual.background }} />
-                                <img src={visual.image} alt={item.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                                <img src={visual.image} alt={getProductImageAlt(item)} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
                               </div>
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-xs font-medium text-[#8C6239]">{item.name}</p>
@@ -293,7 +293,7 @@ export default function Navbar() {
             ))}
           </ul>
           <div className={`flex items-center gap-5 text-xs ${transparentMode ? 'text-white/85' : 'text-[#8C6239]/80'}`}>
-            <span className="flex items-center gap-1.5"><Phone size={11} className="text-[#C5A059]" />+225 07 02 39 60 63</span>
+            <span className="flex items-center gap-1.5"><Phone size={11} className="text-[#C5A059]" />{WHATSAPP_DISPLAY}</span>
           </div>
         </div>
       </nav>

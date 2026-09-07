@@ -1,13 +1,4 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import { useProducts } from '../hooks/useApi'
-import ProductCard2 from '../components/ProductCard2'
-
-const filters = [
-  { label: 'Boubous', value: 'boubou' },
-  { label: 'Tuniques', value: 'tuniques' },
-  { label: 'Accessoires', value: 'accessoires' },
-]
 
 export default function HommePage() {
   return (

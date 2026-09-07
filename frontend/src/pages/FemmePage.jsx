@@ -1,23 +1,28 @@
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { useMemo } from 'react'
 import { useProducts } from '../hooks/useApi'
 import ProductCard2 from '../components/ProductCard2'
 import CategoryFilter from '../components/CategoryFilter'
 
 const filters = [
-  { label: 'Abayas & Kimonos', value: 'kimonos' },
-  { label: 'Ensembles Pantalon', value: 'ensembles-pantalon' },
-  { label: 'Jupes', value: 'jupes' },
-  { label: 'Voiles', value: 'voiles' },
-  { label: 'Jilbebs & Khimars', value: 'jilbebs-khimars' },
-  { label: 'Accessoires', value: 'accessoires' },
-  { label: 'Boubous', value: 'boubou' },
+  { name: 'Tous', slug: 'all' },
+  { name: 'Abayas & Kimonos', slug: 'abayas-kimonos' },
+  { name: 'Robes', slug: 'robes' },
+  { name: 'Ensembles Pantalon', slug: 'ensembles-pantalon' },
+  { name: 'Jupes', slug: 'jupes' },
+  { name: 'Voiles', slug: 'voiles' },
+  { name: 'Accessoires', slug: 'accessoires' },
+  { name: 'Boubous', slug: 'boubous' },
 ]
 
 export default function FemmePage() {
-  const [activeFilter, setActiveFilter] = useState('kimonos')
-  const { products, loading } = useProducts({ category: activeFilter })
-  const activeFilterLabel = filters.find((filter) => filter.value === activeFilter)?.label || 'Articles'
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeFilter = searchParams.get('category') || 'all'
+  const query = useMemo(() => ({
+    category: activeFilter === 'all' ? undefined : activeFilter,
+  }), [activeFilter])
+  const { products, loading } = useProducts(query)
+  const activeFilterLabel = filters.find((filter) => filter.slug === activeFilter)?.name || 'Tous'
 
   return (
     <div className="min-h-screen bg-[#F9EAE1] pt-32 pb-16">
@@ -26,7 +31,7 @@ export default function FemmePage() {
           <p className="text-xs uppercase tracking-[0.32em] text-[#C5A059] font-semibold">Femme</p>
           <h1 className="mt-3 text-4xl font-semibold text-[#8C6239]">Filtrer par catégorie</h1>
           <p className="mt-3 max-w-2xl mx-auto text-sm leading-7 text-[#8C6239]/75">
-            Choisis une catégorie pour afficher les articles correspondants.
+            Tous les produits pour femme sont visibles par défaut. Clique sur un filtre pour affiner la sélection.
           </p>
         </div>
 
@@ -35,7 +40,10 @@ export default function FemmePage() {
             title="Catégories Femme"
             categories={filters}
             activeCategory={activeFilter}
-            onChange={setActiveFilter}
+            onChange={(category) => {
+              if (category === 'all') setSearchParams({})
+              else setSearchParams({ category })
+            }}
           />
         </div>
 

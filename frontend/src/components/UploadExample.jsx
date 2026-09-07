@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { uploadFile } from '../utils/upload'
 
 export default function UploadExample() {

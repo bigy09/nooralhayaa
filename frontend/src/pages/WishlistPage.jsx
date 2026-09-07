@@ -5,7 +5,7 @@ import { Heart, ShoppingBag, Trash2, ArrowLeft, ArrowRight } from 'lucide-react'
 import { useWishlist } from '../context/WishlistContext'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/payment'
-import { getProductVisual } from '../utils/productVisuals'
+import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 
 function WishlistCard({ product, index }) {
   const { remove } = useWishlist()
@@ -36,7 +36,7 @@ function WishlistCard({ product, index }) {
         <div className="absolute inset-0" style={{ background: visual.background }} />
         <img
           src={visual.image}
-          alt={product.name}
+          alt={getProductImageAlt(product)}
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />

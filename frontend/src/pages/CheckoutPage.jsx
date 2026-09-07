@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import { formatPrice, generateMobileMoneyLink, getPaymentMethodDetails } from '../utils/payment'
 import { getDeliveryPrice, getDeliveryZones } from '../utils/delivery'
 import { buildApiUrl } from '../utils/api'
+import { WHATSAPP_DISPLAY } from '../config/site'
 
 const PAYMENT_METHODS = [
   {
@@ -16,7 +17,7 @@ const PAYMENT_METHODS = [
     icon: Smartphone,
     color: 'text-[#00D38A]',
     activeStyle: 'border-[#b8f6de] bg-[#ebfff7]',
-    description: 'Paiement sur le numero 0702396063.',
+    description: `Paiement et assistance WhatsApp au ${WHATSAPP_DISPLAY}.`,
   },
   {
     id: 'orange',
@@ -436,7 +437,7 @@ export default function CheckoutPage() {
                 <div className="mt-6 rounded-2xl border border-[#C5A059]/18 bg-[#fffaf5] p-4 text-sm text-[#8C6239]">
                   <p className="font-semibold">Besoin d'aide ?</p>
                   <p className="mt-2 text-xs leading-relaxed text-[#8C6239]/75">
-                    Si tu as un souci avec le paiement, contacte-nous via WhatsApp au <span className="font-semibold">{paymentConfig.whatsapp || '2250702396063'}</span> ou appelle le service client au <span className="font-semibold">{paymentConfig.infoline || paymentConfig.whatsapp || '2250702396063'}</span>.
+                    Si tu as un souci avec le paiement, contacte-nous via WhatsApp au <span className="font-semibold">{WHATSAPP_DISPLAY}</span>.
                   </p>
                 </div>
               </motion.section>

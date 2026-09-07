@@ -44,6 +44,24 @@ const visualsByName = {
   'Ensemble Makila': makila1,
 }
 
+const descriptionsById = {
+  f1: 'Robe longue bleu marine a motifs geometriques multicolores, portee sur un mannequin avec un turban beige.',
+  f2: 'Robe longue rose pale a motifs floraux rouges et verts, portee sur un mannequin avec un turban rose.',
+  f3: 'Robe longue rose poudree a motifs floraux et manches longues, portee avec un voile rose sur un mannequin.',
+  f4: 'Robe longue blanche a fleurs bleues, portee avec un voile bleu marine sur un mannequin.',
+  f5: 'Ensemble visible compose d une tunique longue verte a motif feuillage, d un pantalon blanc et d un voile blanc.',
+  f6: 'Ensemble visible compose d une tunique longue rose fuchsia a motif graphique, d un pantalon blanc et d un voile blanc.',
+  f7: 'Ensemble visible compose d une tunique longue gris anthracite a motif feuillage, d un pantalon gris et d un voile blanc.',
+  f8: 'Tenue longue bleu marine vue de dos, portee avec un voile bleu marine sur un mannequin.',
+  f9: 'Tenue longue bleu clair vue de dos, portee avec un voile bleu marine sur un mannequin.',
+  f10: 'Robe longue gris lavande a motifs dores, portee avec un voile dore sur un mannequin.',
+  f11: 'Robe longue blanche et prune a motifs abstraits, portee avec un voile violet sur un mannequin.',
+  f12: 'Robe ample bleue a motif abstrait, portee avec un voile vert clair sur un mannequin.',
+  f13: 'Robe longue blanche et noire a motif ondule, portee avec un voile gris sur un mannequin.',
+  f14: 'Robe longue noire a fleurs roses, portee avec un voile noir sur un mannequin.',
+  f15: 'Robe longue bleue a fleurs claires, portee avec un voile noir sur un mannequin.',
+}
+
 const defaultBackground = 'linear-gradient(180deg, #f5ede1 0%, #c49a6c 100%)'
 
 const fallbackByCategory = {
@@ -75,4 +93,10 @@ export function getProductVisual(product) {
   return image
     ? { image, background: defaultBackground }
     : fallbackByCategory[product.categorySlug] || fallbackByCategory.robes
+}
+
+export function getProductImageAlt(product) {
+  if (!product) return 'Article de mode Noor Al Hayaa'
+  return descriptionsById[product.id]
+    || `${product.name} - article de mode presente sur un mannequin`
 }

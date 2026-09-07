@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ArrowLeft, Clock3, MapPin, Mail, Package, Shield, User } from 'lucide-react'
+import { ArrowLeft, MapPin, Mail, Shield, User } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { formatPrice } from '../utils/payment'
 
