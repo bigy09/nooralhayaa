@@ -137,7 +137,17 @@ function createModel(client, table) {
   return {
     find: (query = {}) => createQuery(client, table, query),
     findOne: async (query = {}) => (await createQuery(client, table, query).limit(1))[0] || null,
-    findById: (id) => createQuery(client, table, { id }).limit(1),
+    findById: (id) => {
+      const chain = createQuery(client, table, {})
+      const originalExec = chain.exec
+      chain.exec = async () => {
+        const { data, error } = await client.from(table).select('*').eq('id', id).limit(1)
+        if (error) throw error
+        return (data || []).map((row) => fromRow(row, client, table))
+      }
+      chain.then = (resolve, reject) => chain.exec().then(resolve, reject)
+      return chain
+    },
     create: async (data) => {
       const { data: rows, error } = await client.from(table).insert(toRow(data)).select('*').single()
       if (error) throw error
