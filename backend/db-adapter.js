@@ -1,10 +1,23 @@
 import mongoose from 'mongoose'
 import * as mockDb from './mockDb.js'
+import { initializeSupabase } from './supabase-adapter.js'
 
 let usesMock = false
 let realDb = null
+let usesSupabase = false
 
 export async function initializeDb() {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      realDb = await initializeSupabase()
+      usesSupabase = true
+      console.log('✅ Supabase connected')
+      return false
+    } catch (err) {
+      console.warn('⚠️ Supabase unavailable:', err.message)
+    }
+  }
+
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/noor-al-hayaa'
     await mongoose.connect(mongoUri, {
@@ -40,4 +53,8 @@ export function getDb() {
 
 export function isUsingMock() {
   return usesMock
+}
+
+export function isUsingSupabase() {
+  return usesSupabase
 }

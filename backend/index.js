@@ -15,7 +15,7 @@ import mongoose from 'mongoose';
 import { z } from 'zod';
 import { verifyToken, requireAdmin, requireUser } from './middleware/auth.js';
 import EmailService from './services/EmailService.js';
-import { initializeDb, getDb, isUsingMock } from './db-adapter.js';
+import { initializeDb, getDb, isUsingMock, isUsingSupabase } from './db-adapter.js';
 import { getDeliveryPrice } from './utils/delivery.js';
 
 // These will be set dynamically after DB init
@@ -578,8 +578,8 @@ async function getOrCreateWishlist(sessionId) {
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    mode: isUsingMock() ? 'mock' : 'mongodb',
+    database: isUsingSupabase() || mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    mode: isUsingSupabase() ? 'supabase' : isUsingMock() ? 'mock' : 'mongodb',
   });
 });
 
@@ -1033,7 +1033,7 @@ app.post('/api/orders', verifyToken, requireUser, async (req, res) => {
     for (const item of payload.items) {
       if (!item.productId) return res.status(400).json({ error: 'Produit invalide' });
       let product = null;
-      if (mongoose.Types.ObjectId.isValid(item.productId)) {
+      if (isUsingSupabase() || mongoose.Types.ObjectId.isValid(item.productId)) {
         product = await Product.findById(item.productId).select('name price images inventory isVisible');
       } else {
         product = localCatalogProducts[item.productId] || null;

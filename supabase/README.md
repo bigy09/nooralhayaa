@@ -21,4 +21,12 @@ Ne jamais mettre `SUPABASE_SERVICE_ROLE_KEY` dans le frontend, Cloudflare Pages 
 
 ## État de la migration
 
-Le backend actuel utilise encore Mongoose pour ses routes. Le fichier SQL constitue le socle de migration; l'adaptateur Supabase doit être activé après création du projet et vérification des variables Render. Tant que cette activation n'est pas faite, ne retirez pas `MONGODB_URI` du backend de production.
+Le backend détecte maintenant `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` et utilise l'adaptateur Supabase pour l'authentification, le catalogue et les commandes. Sans ces deux variables, il conserve le repli MongoDB/mock.
+
+Après avoir exécuté le schéma et ajouté les variables dans Render, redéployez le backend puis vérifiez `/api/health` :
+
+```json
+{"status":"ok","database":"connected","mode":"supabase"}
+```
+
+Les agrégations analytiques avancées et la migration des anciennes données MongoDB restent à traiter séparément.
