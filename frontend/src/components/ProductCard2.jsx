@@ -63,7 +63,7 @@ export default function ProductCard2({ product, index = 0 }) {
 
           {/* Badge featured */}
           {product.featured && (
-            <span className="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span className="absolute top-2.5 left-2.5 bg-[#C5A059] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               ✦ Nouveau
             </span>
           )}
@@ -81,7 +81,7 @@ export default function ProductCard2({ product, index = 0 }) {
           <motion.button
             onClick={quickAdd}
             whileTap={{ scale: 0.95 }}
-            className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 bg-white/95 hover:bg-rose-600 hover:text-white text-gray-900 text-xs font-semibold py-2.5 rounded-xl shadow transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0"
+            className="absolute bottom-3 left-3 right-3 flex items-center justify-center gap-2 bg-[#8C6239] hover:bg-[#C5A059] text-white text-xs font-semibold py-2.5 rounded-xl shadow transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0"
           >
             <ShoppingBag size={13} />
             Ajouter au panier
@@ -91,7 +91,7 @@ export default function ProductCard2({ product, index = 0 }) {
         <div className="mt-2.5 px-0.5">
           <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
           <div className="flex items-center justify-between mt-1">
-            <p className="text-sm font-bold text-rose-700">{formatPrice(product.price)}</p>
+            <p className="text-sm font-bold text-[#C5A059]">{formatPrice(product.price)}</p>
             <Stars rating={product.rating} />
           </div>
         </div>

@@ -235,7 +235,7 @@ export default function ProductPage() {
             <button
               onClick={handleAdd}
               className={`flex-1 inline-flex items-center justify-center gap-2 rounded-none md:rounded-xl px-5 py-4 text-sm font-semibold transition-all ${
-                added ? 'bg-green-600 text-white' : 'bg-[#C4542D] text-white hover:brightness-105'
+                added ? 'bg-green-600 text-white' : 'bg-[#8C6239] text-white hover:bg-[#C5A059]'
               }`}
             >
               {added ? <><Check size={15} /> Ajoute au panier</> : <><ShoppingBag size={15} /> Ajouter au panier</>}
