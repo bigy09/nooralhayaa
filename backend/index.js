@@ -33,7 +33,7 @@ const USER_REFRESH_COOKIE = 'user_refresh_token';
 const ADMIN_REFRESH_COOKIE = 'admin_refresh_token';
 const isProduction = process.env.NODE_ENV === 'production';
 const PAYMENT_MINIMUM = Number(process.env.PAYMENT_MINIMUM || 2020);
-const CONTACT_WHATSAPP = process.env.WHATSAPP_PHONE || process.env.MERCHANT_PHONE || '2250702396063';
+const CONTACT_WHATSAPP = process.env.WHATSAPP_PHONE || process.env.MERCHANT_PHONE || '2250161136379';
 const INFOLINE_PHONE = process.env.INFOLINE_PHONE || CONTACT_WHATSAPP;
 const PAYMENT_NUMBERS = {
   wave: process.env.WAVE_PHONE || process.env.WAVE_MERCHANT_PHONE || '0500838940',
@@ -1533,7 +1533,11 @@ app.get('/api/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => 
   }
 });
 
-if (isProduction) {
+app.get('/', (_req, res) => {
+  res.json({ service: 'nooralhayaa-api', status: 'ok' });
+});
+
+if (isProduction && fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));
 
   app.get(/^\/(?!api\/).*/, (_req, res) => {
