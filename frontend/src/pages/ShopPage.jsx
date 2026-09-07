@@ -103,7 +103,6 @@ export default function ShopPage() {
                   <option value="featured">Sélection maison</option>
                   <option value="price-asc">Prix croissant</option>
                   <option value="price-desc">Prix décroissant</option>
-                  <option value="rating">Mieux notés</option>
                 </select>
               </div>
             </div>

@@ -1,25 +1,10 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Star, ShoppingBag, Heart } from 'lucide-react'
+import { ShoppingBag, Heart } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
 import { formatPrice } from '../utils/payment'
 import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
-
-function Stars({ rating }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1,2,3,4,5].map(i => (
-        <Star
-          key={i}
-          size={11}
-          className={i <= Math.round(rating) ? 'text-amber-400 fill-amber-400' : 'text-gray-200 fill-gray-200'}
-        />
-      ))}
-      <span className="text-[10px] text-gray-400 ml-1">{rating}</span>
-    </div>
-  )
-}
 
 export default function ProductCard2({ product, index = 0 }) {
   const { add } = useCart()
@@ -90,9 +75,8 @@ export default function ProductCard2({ product, index = 0 }) {
 
         <div className="mt-2.5 px-0.5">
           <p className="text-sm font-semibold text-gray-900 truncate">{product.name}</p>
-          <div className="flex items-center justify-between mt-1">
+          <div className="mt-1">
             <p className="text-sm font-bold text-[#C5A059]">{formatPrice(product.price)}</p>
-            <Stars rating={product.rating} />
           </div>
         </div>
       </Link>
