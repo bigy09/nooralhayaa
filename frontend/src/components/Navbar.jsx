@@ -80,11 +80,11 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50">
       <div className={`border-b transition-all duration-500 ${surfaceTop}`}>
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/" className="flex flex-shrink-0 items-center gap-2" aria-label="Accueil NOOR AL HAYAA">
             <img
               src={logoNoor}
               alt="Logo NOOR AL HAYAA"
-              className="h-9 w-auto rounded-md border border-white/20 shadow-sm"
+              className="h-12 w-16 rounded-md border border-white/30 bg-white p-1 object-contain shadow-sm"
             />
           </Link>
 

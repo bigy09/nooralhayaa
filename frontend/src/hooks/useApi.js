@@ -21,14 +21,11 @@ function normalizeCategorySlug(slug) {
 }
 
 function getProductGender(product) {
+  if (product.categorySlug === 'boubous') return 'femme'
   const category = normalizeCategorySlug(product.categorySlug)
   if (['boubou', 'tuniques'].includes(category)) return 'homme'
   if (['accessoires'].includes(category)) return 'both'
   return 'femme'
-}
-
-function isCurrentLocalCatalogProduct(product) {
-  return LOCAL_PRODUCTS.some((localProduct) => localProduct.name === product.name)
 }
 
 function filterLocalProducts(params, blockedCategorySlugs) {
@@ -48,23 +45,6 @@ function filterLocalProducts(params, blockedCategorySlugs) {
     ))
   }
   return filtered.filter((product) => !blockedCategorySlugs.includes(normalizeCategorySlug(product.categorySlug))).map(normalizeProduct)
-}
-
-function filterProducts(products, params) {
-  let filtered = products
-  if (params.category) {
-    const category = normalizeCategorySlug(params.category)
-    filtered = filtered.filter((product) => normalizeCategorySlug(product.categorySlug) === category)
-  }
-  if (params.gender) filtered = filtered.filter((product) => getProductGender(product) === params.gender || getProductGender(product) === 'both')
-  if (params.minPrice) filtered = filtered.filter((product) => Number(product.price) >= Number(params.minPrice))
-  if (params.maxPrice) filtered = filtered.filter((product) => Number(product.price) <= Number(params.maxPrice))
-  if (params.featured === 'true') filtered = filtered.filter((product) => product.featured)
-  if (params.search) {
-    const search = params.search.toLowerCase()
-    filtered = filtered.filter((product) => `${product.name} ${product.description || ''}`.toLowerCase().includes(search))
-  }
-  return filtered.map(normalizeProduct)
 }
 
 // Retombe sur le catalogue statique local si l'API est indisponible, mais ne le
@@ -92,9 +72,7 @@ export function useProducts(params = {}) {
       .then(r => r.json())
         .then(data => {
         if (Array.isArray(data)) {
-          const apiProducts = data.map(normalizeProduct).filter(p => !BLOCKED_CATEGORY_SLUGS.includes(normalizeCategorySlug(p.categorySlug)))
-          const hasCurrentCatalog = apiProducts.some(isCurrentLocalCatalogProduct)
-          setProducts(hasCurrentCatalog ? filterProducts(apiProducts, params) : filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
+          setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
         } else {
           logFallback('GET /api/products (unexpected response shape)', data)
           setError('api-unavailable')
@@ -154,7 +132,7 @@ export function useCategories() {
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setCategories(data)
+          setCategories(LOCAL_CATEGORIES)
         } else {
           logFallback('GET /api/categories (empty response)', data)
           setError('api-unavailable')

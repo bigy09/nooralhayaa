@@ -9,9 +9,6 @@ const filters = [
   { name: 'Abayas & Kimonos', slug: 'abayas-kimonos' },
   { name: 'Robes', slug: 'robes' },
   { name: 'Ensembles Pantalon', slug: 'ensembles-pantalon' },
-  { name: 'Jupes', slug: 'jupes' },
-  { name: 'Voiles', slug: 'voiles' },
-  { name: 'Accessoires', slug: 'accessoires' },
   { name: 'Boubous', slug: 'boubous' },
 ]
 
