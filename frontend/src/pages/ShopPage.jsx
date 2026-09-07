@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
-import { useCategories, useProducts } from '../hooks/useApi'
+import { useProducts } from '../hooks/useApi'
 import ProductCard2 from '../components/ProductCard2'
+import { LOCAL_CATEGORIES, LOCAL_PRODUCTS } from '../data/products'
 
 function ShopCard({ product, index }) {
   return <ProductCard2 product={product} index={index} />
@@ -15,9 +16,6 @@ export default function ShopPage() {
   const searchQuery = searchParams.get('search') || ''
   const sortBy = searchParams.get('sort') || 'featured'
   const genderFilter = searchParams.get('gender') || ''
-  const minPrice = searchParams.get('minPrice') || ''
-  const maxPrice = searchParams.get('maxPrice') || ''
-  const { categories } = useCategories()
 
   const categorize = (category) => {
     if (!category) return 'all'
@@ -29,7 +27,8 @@ export default function ShopPage() {
     return 'all'
   }
 
-  const normalizedCategories = (categories || []).map((category) => ({
+  const availableSlugs = new Set(LOCAL_PRODUCTS.map((product) => product.categorySlug))
+  const normalizedCategories = LOCAL_CATEGORIES.filter((category) => availableSlugs.has(category.slug) || category.slug === 'kimonos').map((category) => ({
     ...category,
     group: categorize(category),
   }))
@@ -47,8 +46,6 @@ export default function ShopPage() {
     ...(requestCategory ? { category: requestCategory } : {}),
     ...(searchQuery ? { search: searchQuery } : {}),
     ...(genderFilter ? { gender: genderFilter } : {}),
-    ...(minPrice ? { minPrice } : {}),
-    ...(maxPrice ? { maxPrice } : {}),
   })
 
   useEffect(() => {
@@ -129,7 +126,7 @@ export default function ShopPage() {
             Tout
           </button>
         </div>
-        <div className="mb-5 flex flex-wrap items-end gap-3 rounded-[1.5rem] border border-[#C5A059]/15 bg-white p-4 shadow-[0_12px_30px_rgba(140,98,57,0.06)]">
+        <div className="mb-5 flex flex-wrap items-center gap-3 rounded-[1.5rem] border border-[#C5A059]/15 bg-white p-4 shadow-[0_12px_30px_rgba(140,98,57,0.06)]">
           <label className="flex min-w-36 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
             Genre
             <select value={genderFilter} onChange={(event) => setParam('gender', event.target.value)} className="rounded-full border border-[#C5A059]/25 bg-white px-3 py-2 text-sm font-normal outline-none">
@@ -137,14 +134,6 @@ export default function ShopPage() {
               <option value="femme">Femme</option>
               <option value="homme">Homme</option>
             </select>
-          </label>
-          <label className="flex min-w-32 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
-            Prix minimum
-            <input type="number" min="0" value={minPrice} onChange={(event) => setParam('minPrice', event.target.value)} className="rounded-full border border-[#C5A059]/25 px-3 py-2 text-sm font-normal outline-none" placeholder="0" />
-          </label>
-          <label className="flex min-w-32 flex-1 flex-col gap-1 text-xs font-semibold text-[#8C6239]">
-            Prix maximum
-            <input type="number" min="0" value={maxPrice} onChange={(event) => setParam('maxPrice', event.target.value)} className="rounded-full border border-[#C5A059]/25 px-3 py-2 text-sm font-normal outline-none" placeholder="Sans limite" />
           </label>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
