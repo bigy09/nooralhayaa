@@ -12,6 +12,7 @@ const FIELD_MAP = {
   isOutOfStock: 'is_out_of_stock',
   categoryIds: 'category_ids',
   parent: 'parent_id',
+  order: 'sort_order',
   sortOrder: 'sort_order',
   paymentAmount: 'payment_amount',
   paymentChoice: 'payment_choice',
