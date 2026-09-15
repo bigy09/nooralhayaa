@@ -16,6 +16,7 @@ const FIELD_MAP = {
   sortOrder: 'sort_order',
   paymentAmount: 'payment_amount',
   paymentChoice: 'payment_choice',
+  paymentMethod: 'payment_method',
   remainingAtDelivery: 'remaining_at_delivery',
   paidAmount: 'paid_amount',
   transactionReference: 'transaction_reference',
