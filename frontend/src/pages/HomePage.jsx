@@ -31,7 +31,7 @@ function SectionHeading({ eyebrow, title, body, align = 'left' }) {
 function EditorialCard({ title, subtitle, description, image, background, to, accent, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 32 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.6, delay }}
@@ -78,7 +78,7 @@ function CollectionCard({ product, index }) {
 
   return (
     <motion.article
-      initial={{ opacity: 0, y: 24 }}
+      initial={false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.25 }}
       transition={{ duration: 0.45, delay: index * 0.06 }}
@@ -175,7 +175,7 @@ function SegmentSlider({ id, title, subtitle, products }) {
           {visible.map((product, index) => (
             <motion.div
               key={`${id}-${product.id}-${page}`}
-              initial={{ opacity: 0, y: 20 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.35, delay: index * 0.05 }}
@@ -233,7 +233,7 @@ export default function HomePage() {
           {categoryCards.map((category, index) => (
             <motion.div
               key={category.slug}
-              initial={{ opacity: 0, y: 30 }}
+              initial={false}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.5, delay: index * 0.08 }}

@@ -55,12 +55,13 @@ function logFallback(context, error) {
   console.error(`[useApi] ${context} failed, falling back to local catalog data:`, error)
 }
 
+const BLOCKED_CATEGORY_SLUGS = []
+
 export function useProducts(params = {}) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-
-  const BLOCKED_CATEGORY_SLUGS = []
+  const paramsKey = JSON.stringify(params)
 
   useEffect(() => {
     setLoading(true)
@@ -69,8 +70,8 @@ export function useProducts(params = {}) {
     if (query.isVisible === undefined) query.isVisible = 'true'
     const qs = new URLSearchParams(query).toString()
     fetch(buildApiUrl(`/api/products${qs ? '?' + qs : ''}`))
-      .then(r => r.json())
-        .then(data => {
+      .then((r) => r.json())
+      .then((data) => {
         if (Array.isArray(data)) {
           setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
         } else {
@@ -86,7 +87,7 @@ export function useProducts(params = {}) {
         setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
         setLoading(false)
       })
-  }, [JSON.stringify(params)])
+  }, [params, paramsKey])
 
   return { products, loading, error }
 }

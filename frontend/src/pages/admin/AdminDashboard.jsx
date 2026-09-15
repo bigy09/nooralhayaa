@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AlertCircle,
@@ -103,20 +103,7 @@ export default function AdminDashboard() {
   const [orderFilter, setOrderFilter] = useState('')
   const [productSearch, setProductSearch] = useState('')
 
-  useEffect(() => {
-    initLoad()
-  }, [])
-
-  async function initLoad() {
-    setLoading(true)
-    try {
-      await Promise.all([loadStats(), loadOrders()])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function loadStats() {
+  const loadStats = useCallback(async () => {
     const data = await authFetch('/api/admin/stats')
     setStats({
       todayOrders: data.todayOrders || 0,
@@ -127,39 +114,52 @@ export default function AdminDashboard() {
       weekly: Array.isArray(data.weekly) ? data.weekly : [],
       recentOrders: Array.isArray(data.recentOrders) ? data.recentOrders : [],
     })
-  }
+  }, [authFetch])
 
-  async function loadOrders() {
+  const loadOrders = useCallback(async () => {
     const data = await authFetch('/api/admin/orders?limit=50')
     const nextOrders = Array.isArray(data) ? data : data?.orders
     setOrders(Array.isArray(nextOrders) ? nextOrders : [])
-  }
+  }, [authFetch])
 
-  async function loadProducts() {
+  const loadProducts = useCallback(async () => {
     const q = new URLSearchParams({ limit: '50' })
     if (productSearch.trim()) q.set('search', productSearch.trim())
     const data = await authFetch(`/api/admin/products?${q.toString()}`)
     setProducts(Array.isArray(data.products) ? data.products : [])
-  }
+  }, [authFetch, productSearch])
 
-  async function loadClients() {
+  const loadClients = useCallback(async () => {
     const data = await authFetch('/api/admin/clients')
     setClients(Array.isArray(data.clients) ? data.clients : [])
-  }
+  }, [authFetch])
 
-  async function loadAnalytics() {
+  const loadAnalytics = useCallback(async () => {
     const data = await authFetch('/api/admin/analytics')
     setAnalytics({
       paymentBreakdown: Array.isArray(data.paymentBreakdown) ? data.paymentBreakdown : [],
       statusBreakdown: Array.isArray(data.statusBreakdown) ? data.statusBreakdown : [],
       topProducts: Array.isArray(data.topProducts) ? data.topProducts : [],
     })
-  }
+  }, [authFetch])
 
-  async function loadAuditLogs() {
+  const loadAuditLogs = useCallback(async () => {
     const data = await authFetch('/api/admin/audit-logs?limit=20')
     setAuditLogs(Array.isArray(data.logs) ? data.logs : [])
-  }
+  }, [authFetch])
+
+  const initLoad = useCallback(async () => {
+    setLoading(true)
+    try {
+      await Promise.all([loadStats(), loadOrders()])
+    } finally {
+      setLoading(false)
+    }
+  }, [loadOrders, loadStats])
+
+  useEffect(() => {
+    initLoad()
+  }, [initLoad])
 
   useEffect(() => {
     if (activeView === 'orders') loadOrders()
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
     if (activeView === 'clients') loadClients()
     if (activeView === 'analytics') loadAnalytics()
     if (activeView === 'settings') loadAuditLogs()
-  }, [activeView, productSearch])
+  }, [activeView, loadAnalytics, loadAuditLogs, loadClients, loadOrders, loadProducts])
 
   async function changePassword(event) {
     event.preventDefault()
