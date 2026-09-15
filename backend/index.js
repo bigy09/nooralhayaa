@@ -136,6 +136,10 @@ const localCatalogProducts = {
   f15: { name: 'Ensemble Makila', price: 10000 },
 };
 
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''));
+}
+
 const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email().transform((value) => value.toLowerCase()),
@@ -1032,7 +1036,9 @@ app.post('/api/orders', verifyToken, requireUser, async (req, res) => {
     for (const item of payload.items) {
       if (!item.productId) return res.status(400).json({ error: 'Produit invalide' });
       let product = null;
-      if (isUsingSupabase() || mongoose.Types.ObjectId.isValid(item.productId)) {
+      if (isUsingSupabase() && isUuid(item.productId)) {
+        product = await Product.findById(item.productId).select('name price images inventory isVisible');
+      } else if (mongoose.Types.ObjectId.isValid(item.productId)) {
         product = await Product.findById(item.productId).select('name price images inventory isVisible');
       } else {
         product = localCatalogProducts[item.productId] || null;
