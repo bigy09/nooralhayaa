@@ -1316,6 +1316,15 @@ app.get('/api/admin/orders/:id', verifyToken, requireAdmin, async (req, res) => 
   }
 })
 
+app.get('/api/admin/orders/export', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const orders = await getOrdersInRange(req.query);
+    res.json({ orders });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/admin/products', verifyToken, requireAdmin, async (req, res) => {
   try {
     const search = req.query.search?.trim();
@@ -1391,43 +1400,50 @@ app.put('/api/admin/products/:id', verifyToken, requireAdmin, async (req, res) =
   }
 });
 
-app.get('/api/admin/stats', verifyToken, requireAdmin, async (_req, res) => {
+function getDateRange(query = {}) {
+  const from = query.from ? new Date(`${query.from}T00:00:00`) : null;
+  const to = query.to ? new Date(`${query.to}T23:59:59.999`) : null;
+  return {
+    from: from && !Number.isNaN(from.getTime()) ? from : null,
+    to: to && !Number.isNaN(to.getTime()) ? to : null,
+  };
+}
+
+function orderDateValue(order) {
+  const value = new Date(order.createdAt || order.created_at || 0);
+  return Number.isNaN(value.getTime()) ? null : value;
+}
+
+function isRevenueOrder(order) {
+  return order.status !== 'cancelled';
+}
+
+async function getOrdersInRange(query = {}) {
+  const { from, to } = getDateRange(query);
+  const orders = await Order.find({});
+  return orders.filter((order) => {
+    const date = orderDateValue(order);
+    if (!date) return false;
+    if (from && date < from) return false;
+    if (to && date > to) return false;
+    if (query.status && order.status !== query.status) return false;
+    return true;
+  });
+}
+
+app.get('/api/admin/stats', verifyToken, requireAdmin, async (req, res) => {
   try {
     const now = new Date();
+    const allOrders = await getOrdersInRange(req.query);
     const startDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const startMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startWeek = new Date(now);
     startWeek.setDate(now.getDate() - 6);
     startWeek.setHours(0, 0, 0, 0);
-
-    const [todayOrders, todaySalesRows, monthSalesRows, recentOrders, weeklyRows, statusCounts] = await Promise.all([
-      Order.countDocuments({ createdAt: { $gte: startDay } }),
-      Order.aggregate([{ $match: { createdAt: { $gte: startDay } } }, { $group: { _id: null, total: { $sum: '$total' } } }]),
-      Order.aggregate([{ $match: { createdAt: { $gte: startMonth } } }, { $group: { _id: null, total: { $sum: '$total' } } }]),
-      Order.find({}).sort({ createdAt: -1 }).limit(8),
-      Order.aggregate([
-        { $match: { createdAt: { $gte: startWeek } } },
-        {
-          $group: {
-            _id: {
-              y: { $year: '$createdAt' },
-              m: { $month: '$createdAt' },
-              d: { $dayOfMonth: '$createdAt' },
-            },
-            sales: { $sum: '$total' },
-            orders: { $sum: 1 },
-          },
-        },
-      ]),
-      Order.aggregate([
-        {
-          $group: {
-            _id: '$status',
-            count: { $sum: 1 },
-          },
-        },
-      ]),
-    ]);
+    const todayOrders = allOrders.filter((order) => orderDateValue(order) >= startDay).length;
+    const todaySales = allOrders.filter((order) => orderDateValue(order) >= startDay && isRevenueOrder(order)).reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const monthSales = allOrders.filter((order) => orderDateValue(order) >= startMonth && isRevenueOrder(order)).reduce((sum, order) => sum + Number(order.total || 0), 0);
+    const recentOrders = [...allOrders].sort((a, b) => orderDateValue(b) - orderDateValue(a)).slice(0, 8);
 
     const dayLabels = [];
     for (let i = 6; i >= 0; i -= 1) {
@@ -1439,27 +1455,27 @@ app.get('/api/admin/stats', verifyToken, requireAdmin, async (_req, res) => {
       });
     }
 
-    const weeklyMap = new Map(
-      weeklyRows.map((row) => [
-        `${row._id.y}-${row._id.m}-${row._id.d}`,
-        { sales: row.sales, orders: row.orders, views: 0 },
-      ])
-    );
+    const weeklyMap = new Map();
+    allOrders.filter((order) => orderDateValue(order) >= startWeek).forEach((order) => {
+      const date = orderDateValue(order);
+      const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+      const current = weeklyMap.get(key) || { sales: 0, orders: 0, views: 0 };
+      current.orders += 1;
+      if (isRevenueOrder(order)) current.sales += Number(order.total || 0);
+      weeklyMap.set(key, current);
+    });
 
     const weekly = dayLabels.map((d) => ({
       day: d.label,
       ...(weeklyMap.get(d.key) || { sales: 0, orders: 0, views: 0 }),
     }));
 
-    const counts = statusCounts.reduce(
-      (acc, item) => ({ ...acc, [item._id]: item.count }),
-      {}
-    );
+    const counts = allOrders.reduce((acc, item) => ({ ...acc, [item.status]: (acc[item.status] || 0) + 1 }), {});
 
     res.json({
       todayOrders,
-      todaySales: todaySalesRows[0]?.total || 0,
-      monthSales: monthSalesRows[0]?.total || 0,
+      todaySales,
+      monthSales,
       pendingOrders: counts.pending || 0,
       inProgressOrders: (counts.confirmed || 0) + (counts.shipped || 0),
       weekly,
@@ -1473,20 +1489,19 @@ app.get('/api/admin/stats', verifyToken, requireAdmin, async (_req, res) => {
 app.get('/api/admin/clients', verifyToken, requireAdmin, async (_req, res) => {
   try {
     const users = await User.find({ role: 'user' }).select('_id email createdAt').sort({ createdAt: -1 });
-    const aggregates = await Order.aggregate([
-      {
-        $group: {
-          _id: '$userId',
-          ordersCount: { $sum: 1 },
-          totalSpent: { $sum: '$total' },
-          lastOrderAt: { $max: '$createdAt' },
-        },
-      },
-    ]);
+    const aggregates = (await Order.find({})).reduce((map, order) => {
+      const key = String(order.userId);
+      const current = map.get(key) || { _id: order.userId, ordersCount: 0, totalSpent: 0, lastOrderAt: null };
+      current.ordersCount += 1;
+      if (isRevenueOrder(order)) current.totalSpent += Number(order.total || 0);
+      const date = orderDateValue(order);
+      if (!current.lastOrderAt || date > new Date(current.lastOrderAt)) current.lastOrderAt = date;
+      map.set(key, current);
+      return map;
+    }, new Map());
 
-    const map = new Map(aggregates.map((row) => [String(row._id), row]));
     const clients = users.map((user) => {
-      const stats = map.get(String(user._id));
+      const stats = aggregates.get(String(user._id));
       return {
         id: user._id,
         email: user.email,
@@ -1503,30 +1518,29 @@ app.get('/api/admin/clients', verifyToken, requireAdmin, async (_req, res) => {
   }
 });
 
-app.get('/api/admin/analytics', verifyToken, requireAdmin, async (_req, res) => {
+app.get('/api/admin/analytics', verifyToken, requireAdmin, async (req, res) => {
   try {
-    const [paymentBreakdown, statusBreakdown, topProducts] = await Promise.all([
-      Order.aggregate([
-        { $group: { _id: '$paymentMethod', count: { $sum: 1 }, amount: { $sum: '$total' } } },
-        { $sort: { amount: -1 } },
-      ]),
-      Order.aggregate([
-        { $group: { _id: '$status', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
-      Order.aggregate([
-        { $unwind: '$items' },
-        {
-          $group: {
-            _id: '$items.name',
-            quantity: { $sum: '$items.quantity' },
-            revenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } },
-          },
-        },
-        { $sort: { revenue: -1 } },
-        { $limit: 10 },
-      ]),
-    ]);
+    const orders = await getOrdersInRange(req.query);
+    const paymentMap = new Map();
+    const statusMap = new Map();
+    const productMap = new Map();
+    orders.forEach((order) => {
+      const payment = order.paymentMethod || 'inconnu';
+      const paymentRow = paymentMap.get(payment) || { _id: payment, count: 0, amount: 0 };
+      paymentRow.count += 1;
+      if (isRevenueOrder(order)) paymentRow.amount += Number(order.total || 0);
+      paymentMap.set(payment, paymentRow);
+      statusMap.set(order.status, (statusMap.get(order.status) || 0) + 1);
+      (order.items || []).forEach((item) => {
+        const row = productMap.get(item.name) || { _id: item.name, quantity: 0, revenue: 0 };
+        row.quantity += Number(item.quantity || 0);
+        if (isRevenueOrder(order)) row.revenue += Number(item.price || 0) * Number(item.quantity || 0);
+        productMap.set(item.name, row);
+      });
+    });
+    const paymentBreakdown = [...paymentMap.values()].sort((a, b) => b.amount - a.amount);
+    const statusBreakdown = [...statusMap.entries()].map(([_id, count]) => ({ _id, count })).sort((a, b) => b.count - a.count);
+    const topProducts = [...productMap.values()].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
 
     res.json({ paymentBreakdown, statusBreakdown, topProducts });
   } catch (error) {
@@ -1540,16 +1554,17 @@ app.get('/api/admin/audit-logs', verifyToken, requireAdmin, async (req, res) => 
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 30));
     const action = req.query.action?.trim();
 
-    const query = {};
-    if (action) query.action = action;
-
-    const [logs, total] = await Promise.all([
-      AuditLog.find(query)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit),
-      AuditLog.countDocuments(query),
-    ]);
+    const { from, to } = getDateRange(req.query);
+    const allLogs = await AuditLog.find({});
+    const filteredLogs = allLogs.filter((log) => {
+      const date = orderDateValue(log);
+      if (action && log.action !== action) return false;
+      if (from && (!date || date < from)) return false;
+      if (to && (!date || date > to)) return false;
+      return true;
+    }).sort((a, b) => orderDateValue(b) - orderDateValue(a));
+    const total = filteredLogs.length;
+    const logs = filteredLogs.slice((page - 1) * limit, page * limit);
 
     return res.json({
       logs,

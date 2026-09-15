@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import logoNoor from '../../assets/logo noor al.jpeg'
 
 const STATUS_CONFIG = {
   pending: { label: 'En attente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
@@ -102,9 +103,19 @@ export default function AdminDashboard() {
   const [expandedOrder, setExpandedOrder] = useState(null)
   const [orderFilter, setOrderFilter] = useState('')
   const [productSearch, setProductSearch] = useState('')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+
+  const periodQuery = useCallback((path) => {
+    const query = new URLSearchParams()
+    if (fromDate) query.set('from', fromDate)
+    if (toDate) query.set('to', toDate)
+    const suffix = query.toString()
+    return `${path}${suffix ? `?${suffix}` : ''}`
+  }, [fromDate, toDate])
 
   const loadStats = useCallback(async () => {
-    const data = await authFetch('/api/admin/stats')
+    const data = await authFetch(periodQuery('/api/admin/stats'))
     setStats({
       todayOrders: data.todayOrders || 0,
       todaySales: data.todaySales || 0,
@@ -114,7 +125,7 @@ export default function AdminDashboard() {
       weekly: Array.isArray(data.weekly) ? data.weekly : [],
       recentOrders: Array.isArray(data.recentOrders) ? data.recentOrders : [],
     })
-  }, [authFetch])
+  }, [authFetch, periodQuery])
 
   const loadOrders = useCallback(async () => {
     const data = await authFetch('/api/admin/orders?limit=50')
@@ -135,18 +146,18 @@ export default function AdminDashboard() {
   }, [authFetch])
 
   const loadAnalytics = useCallback(async () => {
-    const data = await authFetch('/api/admin/analytics')
+    const data = await authFetch(periodQuery('/api/admin/analytics'))
     setAnalytics({
       paymentBreakdown: Array.isArray(data.paymentBreakdown) ? data.paymentBreakdown : [],
       statusBreakdown: Array.isArray(data.statusBreakdown) ? data.statusBreakdown : [],
       topProducts: Array.isArray(data.topProducts) ? data.topProducts : [],
     })
-  }, [authFetch])
+  }, [authFetch, periodQuery])
 
   const loadAuditLogs = useCallback(async () => {
-    const data = await authFetch('/api/admin/audit-logs?limit=20')
+    const data = await authFetch(`${periodQuery('/api/admin/audit-logs')}${periodQuery('/api/admin/audit-logs').includes('?') ? '&' : '?'}limit=20`)
     setAuditLogs(Array.isArray(data.logs) ? data.logs : [])
-  }, [authFetch])
+  }, [authFetch, periodQuery])
 
   const initLoad = useCallback(async () => {
     setLoading(true)
@@ -271,6 +282,42 @@ export default function AdminDashboard() {
     document.body.removeChild(link)
   }
 
+  async function exportSales() {
+    const data = await authFetch(periodQuery('/api/admin/orders/export'))
+    const rows = [
+      ['Commande', 'Date', 'Client', 'Téléphone', 'Statut', 'Paiement', 'Sous-total', 'Livraison', 'Total'],
+      ...(data.orders || []).map((order) => [
+        order.orderNumber,
+        new Date(order.createdAt).toLocaleString('fr-FR'),
+        order.customer?.name || '',
+        order.customer?.phone || '',
+        STATUS_CONFIG[order.status]?.label || order.status,
+        PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod || '',
+        order.subtotal ?? 0,
+        order.shipping ?? 0,
+        order.total ?? 0,
+      ]),
+    ]
+    const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(';')).join('\n')
+    const blob = new Blob([`\ufeff${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `ventes-${fromDate || 'debut'}-${toDate || 'aujourd-hui'}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(link.href)
+  }
+
+  function printDeliveryNote(order) {
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]))
+    const popup = window.open('', '_blank', 'width=800,height=900')
+    if (!popup) return
+    const items = (order.items || []).map((item) => `<tr><td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.size || '-')}</td><td>${item.quantity}</td><td>${Number(item.price || 0).toLocaleString('fr-FR')} F CFA</td></tr>`).join('')
+    popup.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>Bon de livraison ${escapeHtml(order.orderNumber)}</title><style>body{font-family:Arial,sans-serif;color:#4f3520;margin:40px}header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #c5a059;padding-bottom:18px}header img{width:150px;max-height:70px;object-fit:contain}h1{color:#8c6239}table{width:100%;border-collapse:collapse;margin-top:24px}th,td{border-bottom:1px solid #ead8c7;padding:10px;text-align:left}th{background:#f9eae1}.total{text-align:right;font-size:18px;font-weight:bold;margin-top:20px}.meta{line-height:1.7}footer{margin-top:50px;color:#8c6239;font-size:12px}@media print{button{display:none}}</style></head><body><header><img src="${logoNoor}" alt="Noor Al Hayaa"><div><h1>Bon de livraison</h1><div>${escapeHtml(order.orderNumber)}</div><div>${new Date(order.createdAt).toLocaleDateString('fr-FR')}</div></div></header><section class="meta"><h2>Client</h2><div>${escapeHtml(order.customer?.name)}</div><div>${escapeHtml(order.customer?.phone)}</div><div>${escapeHtml(order.customer?.address)}</div></section><table><thead><tr><th>Article</th><th>Taille</th><th>Qté</th><th>Prix</th></tr></thead><tbody>${items}</tbody></table><div class="total">Total : ${Number(order.total || 0).toLocaleString('fr-FR')} F CFA</div><footer>NOOR AL HAYAA · Mode modeste · +225 05 00 83 89 40</footer><script>window.onload=()=>window.print()</script></body></html>`)
+    popup.document.close()
+  }
+
   const filteredOrders = useMemo(() => {
     if (!orderFilter) return orders
     if (orderFilter === 'inProgress') return orders.filter((o) => ['confirmed', 'shipped'].includes(o.status))
@@ -317,6 +364,12 @@ export default function AdminDashboard() {
         </aside>
 
         <section>
+          <div className="mb-6 flex flex-wrap items-end gap-3 rounded-2xl border border-[#C5A059]/18 bg-white p-4 shadow-[0_18px_45px_rgba(140,98,57,0.08)]">
+            <label className="text-xs font-semibold text-[#8C6239]">Du<input type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} className="mt-1 block rounded-lg border border-[#C5A059]/25 px-3 py-2 text-sm font-normal" /></label>
+            <label className="text-xs font-semibold text-[#8C6239]">Au<input type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} className="mt-1 block rounded-lg border border-[#C5A059]/25 px-3 py-2 text-sm font-normal" /></label>
+            <button type="button" onClick={() => { setFromDate(''); setToDate('') }} className="rounded-lg border border-[#C5A059]/25 px-3 py-2 text-sm text-[#8C6239]">Toute la période</button>
+            <button type="button" onClick={exportSales} className="rounded-lg bg-[#8C6239] px-3 py-2 text-sm font-semibold text-white">Exporter les ventes</button>
+          </div>
           {(activeView === 'dashboard' || activeView === 'orders') && (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               {[
@@ -492,6 +545,13 @@ export default function AdminDashboard() {
                               className="px-3 py-2 rounded-full bg-[#F4DFD1] text-[#8C6239] text-sm font-semibold hover:bg-[#C5A059] hover:text-white transition-colors"
                             >
                               Marquer indisponible
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => printDeliveryNote(order)}
+                              className="px-3 py-2 rounded-lg border border-[#C5A059]/35 text-[#8C6239] text-sm font-semibold hover:bg-[#F9EAE1]"
+                            >
+                              Bon de livraison
                             </button>
                           </div>
                     </div>
