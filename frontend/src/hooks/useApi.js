@@ -66,28 +66,29 @@ export function useProducts(params = {}) {
   useEffect(() => {
     setLoading(true)
     setError(null)
-    const query = { ...params }
+    const requestParams = JSON.parse(paramsKey)
+    const query = { ...requestParams }
     if (query.isVisible === undefined) query.isVisible = 'true'
     const qs = new URLSearchParams(query).toString()
     fetch(buildApiUrl(`/api/products${qs ? '?' + qs : ''}`))
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
+          setProducts(filterLocalProducts(requestParams, BLOCKED_CATEGORY_SLUGS))
         } else {
           logFallback('GET /api/products (unexpected response shape)', data)
           setError('api-unavailable')
-          setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
+          setProducts(filterLocalProducts(requestParams, BLOCKED_CATEGORY_SLUGS))
         }
         setLoading(false)
       })
       .catch((err) => {
         logFallback('GET /api/products', err)
         setError('api-unavailable')
-        setProducts(filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
+        setProducts(filterLocalProducts(requestParams, BLOCKED_CATEGORY_SLUGS))
         setLoading(false)
       })
-  }, [params, paramsKey])
+  }, [paramsKey])
 
   return { products, loading, error }
 }
