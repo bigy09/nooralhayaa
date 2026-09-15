@@ -58,15 +58,16 @@ function logFallback(context, error) {
 const BLOCKED_CATEGORY_SLUGS = []
 
 export function useProducts(params = {}) {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [products, setProducts] = useState(() => filterLocalProducts(params, BLOCKED_CATEGORY_SLUGS))
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const paramsKey = JSON.stringify(params)
 
   useEffect(() => {
-    setLoading(true)
-    setError(null)
     const requestParams = JSON.parse(paramsKey)
+    setProducts(filterLocalProducts(requestParams, BLOCKED_CATEGORY_SLUGS))
+    setLoading(false)
+    setError(null)
     const query = { ...requestParams }
     if (query.isVisible === undefined) query.isVisible = 'true'
     const qs = new URLSearchParams(query).toString()
