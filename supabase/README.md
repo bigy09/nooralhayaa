@@ -21,6 +21,12 @@ Ne jamais mettre `SUPABASE_SERVICE_ROLE_KEY` dans le frontend, Cloudflare Pages 
 
 ## État de la migration
 
+Si la table `orders` existait déjà avant l'ajout du paiement, exécuter aussi
+[`migrations/20260915_orders_payment_fields.sql`](migrations/20260915_orders_payment_fields.sql)
+dans le SQL Editor Supabase. Le message `Could not find the 'paymentMethod'
+column of 'orders' in the schema cache` signifie que cette mise à niveau n'a
+pas encore été appliquée.
+
 Le backend détecte maintenant `SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` et utilise l'adaptateur Supabase pour l'authentification, le catalogue et les commandes. Sans ces deux variables, il conserve le repli MongoDB/mock.
 
 Après avoir exécuté le schéma et ajouté les variables dans Render, redéployez le backend puis vérifiez `/api/health` :
