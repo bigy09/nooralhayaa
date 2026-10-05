@@ -9,7 +9,7 @@ import { useSiteConfig } from '../hooks/useSiteConfig'
 import { getProductImageAlt, getProductVisual } from '../utils/productVisuals'
 import { formatPrice } from '../utils/payment'
 import logoNoor from '../assets/logo noor al.jpeg'
-import { buildWhatsAppLink, WHATSAPP_DISPLAY } from '../config/site'
+import { buildWhatsAppLink, SITE_NAME, WHATSAPP_DISPLAY } from '../config/site'
 
 export default function Navbar() {
   const { count, items: cartItems, total } = useCart()
@@ -80,14 +80,15 @@ export default function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50">
       <div className={`border-b transition-all duration-500 ${surfaceTop}`}>
         <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-4">
-          <Link to="/" className="flex flex-shrink-0 items-center gap-2" aria-label="Accueil NOOR AL HAYAA">
-            <span className="flex h-14 w-28 items-center justify-center overflow-hidden rounded-md border border-white/30 bg-white shadow-sm">
+          <Link to="/" className="flex flex-shrink-0 items-center gap-2" aria-label={`Accueil ${SITE_NAME}`}>
+            <span className="flex h-12 w-16 items-center justify-center overflow-hidden rounded-md border border-white/30 bg-white shadow-sm">
               <img
                 src={logoNoor}
                 alt="Logo NOOR AL HAYAA"
-                className="h-full w-full scale-[1.55] object-cover"
+                className="h-full w-full object-contain"
               />
             </span>
+            <span className="text-xs font-semibold leading-tight text-white sm:text-sm">{SITE_NAME}</span>
           </Link>
 
           <form onSubmit={handleSearch} className="hidden md:block flex-1 max-w-sm mx-4">
